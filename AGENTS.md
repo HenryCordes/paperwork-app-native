@@ -68,7 +68,14 @@ speculatively ahead of real code.
 
 1. Brainstorm -> 2. Spec -> 3. Implementation plan -> 4. Implement.
 
-Each phase's implementation plan lives at `docs/plans/<date>-<topic>.md`, mirroring paperwork-app's per-feature spec/plan structure but without coupling the path to any specific tool's branding.
+Each phase gets its own folder under [specs/](specs), mirroring
+`paperwork-app`'s convention exactly: `assessment.md` (research/brainstorm
+findings, when the phase needs one), `design.md` (the spec), and `plan.md`
+(the implementation plan). Not every phase needs all three — Phase 0's
+design lives in `paperwork-app`'s
+`specs/2026-06-24-paperwork-app-native-migration/design.md` instead, since
+the migration-level design was done before this repo existed; its folder
+here holds only `plan.md`.
 
 For agentic execution use the Superpowers skills
 (`superpowers:executing-plans`, `superpowers:subagent-driven-development`)

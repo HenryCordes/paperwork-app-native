@@ -17,4 +17,6 @@ More get added as later phases introduce their own recurring patterns
 ## Workflow
 
 Brainstorm -> spec -> implementation plan -> implement, on the
-[Superpowers](https://github.com/obra/superpowers) workflow. Plans live in [docs/plans/](docs/plans).
+[Superpowers](https://github.com/obra/superpowers) workflow. Specs and plans
+live in [specs/](specs), one folder per phase — same structure as
+`paperwork-app`.
