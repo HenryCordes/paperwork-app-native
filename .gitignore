@@ -41,3 +41,6 @@ example
 # generated native folders
 /ios
 /android
+
+# scratch coordination files (task briefs, reports, diffs) - never committed
+/.superpowers
