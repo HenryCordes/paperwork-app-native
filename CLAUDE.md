@@ -9,10 +9,12 @@ stays thin to avoid duplicating that source of truth.
 
 ## Skills
 
-[.claude/skills/](.claude/skills): `add-rn-screen`, `add-api-hook` —
-recurring scaffolding tasks with this project's conventions baked in.
-More get added as later phases introduce their own recurring patterns
-(native feature wrappers, receipt-parsing rules).
+[.claude/skills/](.claude/skills): `add-rn-screen`, `add-api-hook`,
+`add-native-feature` — recurring scaffolding tasks with this project's
+conventions baked in. `add-receipt-rule` and the `receipt-parsing-reviewer`
+subagent are deferred to the phase that builds the receipt rule engine in
+RN — porting them now would describe implementation details that don't
+exist yet.
 
 ## Workflow
 

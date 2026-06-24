@@ -29,11 +29,15 @@ Load the right doc for the task instead of reading everything:
 | Topic | File | When to read |
 |-------|------|-------------|
 | Architecture & structure | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | App structure, routing, folder layout, where a file belongs |
+| State & data layer | [docs/STATE_MANAGEMENT.md](docs/STATE_MANAGEMENT.md) | Fetching/mutating data, adding an API service or hook, query keys |
+| Frontend | [docs/FRONTEND.md](docs/FRONTEND.md) | Building screens, styling, render/list performance |
+| Native functionality | [docs/NATIVE.md](docs/NATIVE.md) | Camera, scanner, OCR, secure storage, biometric, push, badge |
+| Testing | [docs/TESTING.md](docs/TESTING.md) | Writing or changing tests |
 
-Other topics (state/data layer, frontend component patterns, native
-functionality, receipt parsing, testing strategy) get their own doc and
-index entry once the phase that introduces them lands — not written
-speculatively ahead of real code.
+Receipt parsing has no doc yet — it's deferred to the phase that actually
+builds the rule engine in RN, since paperwork-app's `RECEIPT_PARSING.md`
+documents specific detector/rule-engine internals that don't exist here
+yet and a guess now would just be wrong later.
 
 ## Tech Stack
 
