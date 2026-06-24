@@ -66,12 +66,14 @@ paperwork-app-native/
 ## Task 1: API/data-layer bootstrap
 
 **Files:**
+
 - Create: `src/api/types.ts`
 - Create: `src/api/axiosInstance.ts`
 - Create: `src/api/queryClient.ts`
 - Create: `src/api/queryKeys.ts`
 
 **Interfaces:**
+
 - Produces: `ApiError`, `User`, `LoginRequest`, `LoginResponse` types; a default-exported `axiosInstance` (configured `AxiosInstance`); a `queryClient` (configured `QueryClient`); `QueryKeys.auth.base/user()/token()/profile()`.
 
 No test for this task — pure configuration, no behavior to assert (same reasoning as Phase 0's Expo-scaffold task). Task 3 (`authService`) exercises `axiosInstance` for real by mocking it.
@@ -180,10 +182,12 @@ EOF
 ## Task 2: Secure storage wrapper
 
 **Files:**
+
 - Create: `src/services/secureStorage.ts`
 - Create: `src/__tests__/services/secureStorage.test.ts`
 
 **Interfaces:**
+
 - Produces: `secureStorage.getItem(key): Promise<string | null>`, `secureStorage.setItem(key, value): Promise<void>`, `secureStorage.removeItem(key): Promise<void>`. Exported key constants: `AUTH_TOKEN_KEY`, `RECENT_LOGOUT_KEY`, `SESSION_TIMEOUT_KEY`, `LAST_ACTIVE_KEY`, `AUTH_IN_PROGRESS_KEY`, `BIOMETRICS_ENABLED_KEY`, `BIOMETRICS_USERNAME_KEY`, `BIOMETRICS_PASSWORD_KEY` (all `string`). Every later task in this phase imports keys from here — no consumer defines its own key string.
 
 - [ ] **Step 1: Install the dependency**
@@ -224,7 +228,7 @@ describe("secureStorage", () => {
     await secureStorage.setItem("some_key", "some_value");
     expect(SecureStore.setItemAsync).toHaveBeenCalledWith(
       "some_key",
-      "some_value"
+      "some_value",
     );
   });
 
@@ -346,10 +350,12 @@ EOF
 ## Task 3: authService
 
 **Files:**
+
 - Create: `src/api/services/authService.ts`
 - Create: `src/__tests__/api/services/authService.test.ts`
 
 **Interfaces:**
+
 - Consumes: `secureStorage`, `AUTH_TOKEN_KEY` (Task 2); `axiosInstance` (Task 1).
 - Produces: `AuthService` class + `authService` singleton default export. `login(credentials: LoginRequest): Promise<LoginResponse>`, `logout(): Promise<void>`, `isAuthenticated(): Promise<boolean>` — both `logout` and `isAuthenticated` are **async** here (unlike the source's synchronous versions), since they go through `secureStorage`. Task 4 depends on this async contract.
 
@@ -400,7 +406,7 @@ describe("AuthService", () => {
       });
       expect(secureStorage.setItem).toHaveBeenCalledWith(
         AUTH_TOKEN_KEY,
-        "abc123"
+        "abc123",
       );
       expect(result.token).toBe("abc123");
     });
@@ -412,7 +418,7 @@ describe("AuthService", () => {
       const service = new AuthService(mockAxios as never);
 
       await expect(
-        service.login({ email: "a@b.com", password: "wrong" })
+        service.login({ email: "a@b.com", password: "wrong" }),
       ).rejects.toThrow("Inloggegevens onjuist");
     });
 
@@ -421,7 +427,7 @@ describe("AuthService", () => {
       const service = new AuthService(mockAxios as never);
 
       await expect(
-        service.login({ email: "a@b.com", password: "wrong" })
+        service.login({ email: "a@b.com", password: "wrong" }),
       ).rejects.toThrow("Login mislukt");
     });
   });
@@ -480,7 +486,7 @@ export class AuthService {
     try {
       const response = await this.axios.post<LoginResponse>(
         "auth/login",
-        credentials
+        credentials,
       );
 
       if (response.data.token) {
@@ -540,12 +546,14 @@ EOF
 ## Task 4: AuthContext + useAuth
 
 **Files:**
+
 - Create: `src/contexts/AuthContext.tsx`
 - Create: `src/hooks/useAuth.ts`
 - Create: `src/__tests__/contexts/AuthContext.test.tsx`
 - Create: `src/__tests__/hooks/useAuth.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `authService` (Task 3); `secureStorage`, `RECENT_LOGOUT_KEY` (Task 2); `QueryKeys` (Task 1).
 - Produces: `AuthProvider` (component), `useAuthContext()` returning `{ isAuthenticated: boolean, isLoading: boolean, checkAuthentication: () => Promise<boolean>, setAuthenticated: (value: boolean) => void }`. `useAuth()` returning `{ login: UseMutationResult<LoginResponse, Error, LoginRequest>, logout: () => Promise<void>, isAuthenticated: () => boolean, checkAuthentication: () => Promise<boolean>, getCurrentUser: () => User | undefined }`. Task 5 (`useSessionManager`) and Task 8 (Login screen) both consume `useAuth()`'s exact shape above.
 
@@ -681,13 +689,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       checkAuthentication,
       setAuthenticated,
     }),
-    [isAuthenticated, isLoading, checkAuthentication]
+    [isAuthenticated, isLoading, checkAuthentication],
   );
 
   return (
-    <AuthContext.Provider value={contextValue}>
-      {children}
-    </AuthContext.Provider>
+    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
   );
 };
 
@@ -793,10 +799,7 @@ describe("useAuth", () => {
     });
 
     expect(result.current.isAuthenticated()).toBe(false);
-    expect(secureStorage.setItem).toHaveBeenCalledWith(
-      "recent_logout",
-      "true"
-    );
+    expect(secureStorage.setItem).toHaveBeenCalledWith("recent_logout", "true");
     expect(authService.logout).toHaveBeenCalled();
   });
 });
@@ -833,8 +836,7 @@ export const useAuth = () => {
 
   const login: UseMutationResult<LoginResponse, Error, LoginRequest> =
     useMutation({
-      mutationFn: (credentials: LoginRequest) =>
-        authService.login(credentials),
+      mutationFn: (credentials: LoginRequest) => authService.login(credentials),
       onSuccess: (data) => {
         authContext.setAuthenticated(true);
         queryClient.invalidateQueries({ queryKey: QueryKeys.auth.base });
@@ -904,6 +906,7 @@ EOF
 ## Task 5: Biometrics module
 
 **Files:**
+
 - Create: `src/hooks/biometrics/biometrics.types.ts`
 - Create: `src/hooks/biometrics/biometrics.service.ts`
 - Create: `src/hooks/biometrics/useBiometrics.ts`
@@ -912,6 +915,7 @@ EOF
 - Create: `src/__tests__/utils/bioMetricUtils.test.ts`
 
 **Interfaces:**
+
 - Consumes: `secureStorage`, `BIOMETRICS_ENABLED_KEY`, `BIOMETRICS_USERNAME_KEY`, `BIOMETRICS_PASSWORD_KEY` (Task 2).
 - Produces: `BiometricType` enum (`NONE`/`FINGERPRINT`/`FACE`/`IRIS`), `BiometricAvailability`/`BiometricCredentials`/`BiometricAuthOptions` types, `BiometricsService` class, `useBiometrics()` returning `UseBiometrics` (`checkAvailability`, `authenticate`, `saveCredentials`, `getCredentials`, `clearCredentials`, `isBiometricsEnabled`, `setBiometricsEnabled` — all the methods below, no `deleteCredentials`/`getBiometricType`, see note). `getBiometricName(type, upperCase?): string`. Tasks 6, 7, and 8 all consume `useBiometrics()`'s exact shape.
 
@@ -1006,10 +1010,10 @@ describe("BiometricsService", () => {
   describe("checkAvailability", () => {
     it("reports available with face type when hardware, enrollment, and face type are present", async () => {
       (LocalAuthentication.hasHardwareAsync as jest.Mock).mockResolvedValue(
-        true
+        true,
       );
       (LocalAuthentication.isEnrolledAsync as jest.Mock).mockResolvedValue(
-        true
+        true,
       );
       (
         LocalAuthentication.supportedAuthenticationTypesAsync as jest.Mock
@@ -1030,10 +1034,10 @@ describe("BiometricsService", () => {
 
     it("reports unavailable when there's no hardware", async () => {
       (LocalAuthentication.hasHardwareAsync as jest.Mock).mockResolvedValue(
-        false
+        false,
       );
       (LocalAuthentication.isEnrolledAsync as jest.Mock).mockResolvedValue(
-        false
+        false,
       );
       (
         LocalAuthentication.supportedAuthenticationTypesAsync as jest.Mock
@@ -1070,11 +1074,11 @@ describe("BiometricsService", () => {
       expect(saved).toBe(true);
       expect(secureStorage.setItem).toHaveBeenCalledWith(
         BIOMETRICS_USERNAME_KEY,
-        "a@b.com"
+        "a@b.com",
       );
       expect(secureStorage.setItem).toHaveBeenCalledWith(
         BIOMETRICS_PASSWORD_KEY,
-        "pw"
+        "pw",
       );
     });
 
@@ -1104,7 +1108,7 @@ describe("BiometricsService", () => {
       await service.setBiometricsEnabled(true);
       expect(secureStorage.setItem).toHaveBeenCalledWith(
         BIOMETRICS_ENABLED_KEY,
-        "true"
+        "true",
       );
     });
   });
@@ -1142,7 +1146,7 @@ import {
 } from "./biometrics.types";
 
 function toAppBiometricType(
-  types: LocalAuthentication.AuthenticationType[]
+  types: LocalAuthentication.AuthenticationType[],
 ): BiometricType {
   if (
     types.includes(LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION)
@@ -1212,11 +1216,11 @@ export class BiometricsService {
     try {
       await secureStorage.setItem(
         BIOMETRICS_USERNAME_KEY,
-        credentials.username
+        credentials.username,
       );
       await secureStorage.setItem(
         BIOMETRICS_PASSWORD_KEY,
-        credentials.password
+        credentials.password,
       );
       return true;
     } catch {
@@ -1248,7 +1252,7 @@ export class BiometricsService {
   async setBiometricsEnabled(enabled: boolean): Promise<void> {
     await secureStorage.setItem(
       BIOMETRICS_ENABLED_KEY,
-      enabled ? "true" : "false"
+      enabled ? "true" : "false",
     );
   }
 }
@@ -1283,43 +1287,42 @@ const biometricsService = new BiometricsService();
 
 export const useBiometrics = (): UseBiometrics => {
   const checkAvailability = useCallback(
-    (): Promise<BiometricAvailability> =>
-      biometricsService.checkAvailability(),
-    []
+    (): Promise<BiometricAvailability> => biometricsService.checkAvailability(),
+    [],
   );
 
   const authenticate = useCallback(
     (options: BiometricAuthOptions): Promise<boolean> =>
       biometricsService.authenticate(options),
-    []
+    [],
   );
 
   const saveCredentials = useCallback(
     (credentials: BiometricCredentials): Promise<boolean> =>
       biometricsService.saveCredentials(credentials),
-    []
+    [],
   );
 
   const getCredentials = useCallback(
     (): Promise<BiometricCredentials | null> =>
       biometricsService.getCredentials(),
-    []
+    [],
   );
 
   const clearCredentials = useCallback(
     (): Promise<void> => biometricsService.clearCredentials(),
-    []
+    [],
   );
 
   const isBiometricsEnabled = useCallback(
     (): Promise<boolean> => biometricsService.isBiometricsEnabled(),
-    []
+    [],
   );
 
   const setBiometricsEnabled = useCallback(
     (enabled: boolean): Promise<void> =>
       biometricsService.setBiometricsEnabled(enabled),
-    []
+    [],
   );
 
   return {
@@ -1364,7 +1367,7 @@ describe("getBiometricName", () => {
   it("respects the upperCase flag on Android for FINGERPRINT", () => {
     Object.defineProperty(Platform, "OS", { get: () => "android" });
     expect(getBiometricName(BiometricType.FINGERPRINT, true)).toBe(
-      "Fingerprint Unlock"
+      "Fingerprint Unlock",
     );
   });
 
@@ -1393,7 +1396,7 @@ import { BiometricType } from "@/hooks/biometrics/biometrics.types";
 
 export const getBiometricName = (
   biometryType: BiometricType,
-  upperCase?: boolean
+  upperCase?: boolean,
 ): string => {
   let androidFace = "face unlock";
   let androidFingerprint = "fingerprint unlock";
@@ -1445,10 +1448,12 @@ EOF
 ## Task 6: useSessionManager
 
 **Files:**
+
 - Create: `src/hooks/useSessionManager.ts`
 - Create: `src/__tests__/hooks/useSessionManager.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `useBiometrics()` (Task 5), `useAuth()` (Task 4), `getBiometricName` (Task 5), `secureStorage` + key constants (Task 2), `useRouter` from `expo-router`.
 - Produces: `useSessionManager()` returning `{ sessionTimeoutMinutes: number, saveSessionTimeout: (minutes: number) => Promise<void>, updateLastActive: () => Promise<void> }`.
 
@@ -1500,7 +1505,7 @@ const mockCheckAvailability = jest.fn();
 
 function mockStorage(values: Record<string, string | null>) {
   (secureStorage.getItem as jest.Mock).mockImplementation((key: string) =>
-    Promise.resolve(key in values ? values[key] : null)
+    Promise.resolve(key in values ? values[key] : null),
   );
 }
 
@@ -1545,8 +1550,8 @@ describe("useSessionManager", () => {
     await waitFor(() =>
       expect(secureStorage.setItem).toHaveBeenCalledWith(
         LAST_ACTIVE_KEY,
-        expect.any(String)
-      )
+        expect.any(String),
+      ),
     );
     expect(mockIsBiometricsEnabled).not.toHaveBeenCalled();
   });
@@ -1565,8 +1570,8 @@ describe("useSessionManager", () => {
     await waitFor(() =>
       expect(secureStorage.setItem).toHaveBeenCalledWith(
         AUTH_IN_PROGRESS_KEY,
-        "true"
-      )
+        "true",
+      ),
     );
     expect(mockIsBiometricsEnabled).not.toHaveBeenCalled();
     expect(mockAuthenticate).not.toHaveBeenCalled();
@@ -1587,8 +1592,8 @@ describe("useSessionManager", () => {
     await waitFor(() =>
       expect(secureStorage.setItem).toHaveBeenCalledWith(
         AUTH_IN_PROGRESS_KEY,
-        "true"
-      )
+        "true",
+      ),
     );
     expect(mockIsBiometricsEnabled).not.toHaveBeenCalled();
   });
@@ -1614,7 +1619,7 @@ describe("useSessionManager", () => {
       expect(mockLoginMutateAsync).toHaveBeenCalledWith({
         email: "a@b.com",
         password: "pw",
-      })
+      }),
     );
   });
 
@@ -1675,7 +1680,7 @@ const DEFAULT_SESSION_TIMEOUT = 15;
 
 export const useSessionManager = () => {
   const [sessionTimeoutMinutes, setSessionTimeoutMinutes] = useState<number>(
-    DEFAULT_SESSION_TIMEOUT
+    DEFAULT_SESSION_TIMEOUT,
   );
   const {
     isBiometricsEnabled,
@@ -1692,7 +1697,7 @@ export const useSessionManager = () => {
       if (stored === null) {
         await secureStorage.setItem(
           SESSION_TIMEOUT_KEY,
-          DEFAULT_SESSION_TIMEOUT.toString()
+          DEFAULT_SESSION_TIMEOUT.toString(),
         );
         setSessionTimeoutMinutes(DEFAULT_SESSION_TIMEOUT);
         return;
@@ -1811,7 +1816,7 @@ export const useSessionManager = () => {
 
     const subscription = AppState.addEventListener(
       "change",
-      handleAppStateChange
+      handleAppStateChange,
     );
 
     const initialCheck = async () => {
@@ -1875,12 +1880,14 @@ EOF
 ## Task 7: BiometricOptIn + BiometricLogin components
 
 **Files:**
+
 - Create: `src/components/BiometricOptIn.tsx`
 - Create: `src/components/BiometricLogin.tsx`
 - Create: `src/__tests__/components/BiometricOptIn.test.tsx`
 - Create: `src/__tests__/components/BiometricLogin.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `useBiometrics()` (Task 5), `getBiometricName` (Task 5), `Colors`/`Spacing` (Phase 0's `theme.ts`).
 - Produces: `BiometricOptIn({ username, password, onComplete, onCancel })` and `BiometricLogin({ onLoginSuccess, onCancel, autoPrompt? })`, both RN components. Task 8 (Login screen) renders both.
 
@@ -1922,7 +1929,7 @@ describe("BiometricOptIn", () => {
         password="pw"
         onComplete={onComplete}
         onCancel={jest.fn()}
-      />
+      />,
     );
 
     fireEvent.press(await findByText("Doorgaan zonder biometrie"));
@@ -1942,7 +1949,7 @@ describe("BiometricOptIn", () => {
         password="pw"
         onComplete={onComplete}
         onCancel={jest.fn()}
-      />
+      />,
     );
 
     fireEvent(await findByRole("switch"), "valueChange", true);
@@ -1952,7 +1959,7 @@ describe("BiometricOptIn", () => {
       expect(mockSaveCredentials).toHaveBeenCalledWith({
         username: "a@b.com",
         password: "pw",
-      })
+      }),
     );
     expect(mockSetBiometricsEnabled).toHaveBeenCalledWith(true);
     expect(onComplete).toHaveBeenCalledWith(true);
@@ -1968,7 +1975,7 @@ describe("BiometricOptIn", () => {
         password="pw"
         onComplete={onComplete}
         onCancel={jest.fn()}
-      />
+      />,
     );
 
     fireEvent.press(await findByText("Doorgaan"));
@@ -2025,7 +2032,7 @@ export function BiometricOptIn({
 
   const [biometricAvailable, setBiometricAvailable] = useState(false);
   const [biometricLabel, setBiometricLabel] = useState(
-    "Biometrische verificatie"
+    "Biometrische verificatie",
   );
   const [enableBiometrics, setEnableBiometrics] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -2084,9 +2091,7 @@ export function BiometricOptIn({
   }
 
   return (
-    <View
-      style={[styles.card, { backgroundColor: colors.backgroundElement }]}
-    >
+    <View style={[styles.card, { backgroundColor: colors.backgroundElement }]}>
       <View style={styles.header}>
         <Text style={[styles.title, { color: colors.text }]}>
           {biometricLabel} inschakelen
@@ -2100,9 +2105,7 @@ export function BiometricOptIn({
         wachtwoord te typen.
       </Text>
       <View style={styles.row}>
-        <Text style={{ color: colors.text }}>
-          {biometricLabel} inschakelen
-        </Text>
+        <Text style={{ color: colors.text }}>{biometricLabel} inschakelen</Text>
         <Switch value={enableBiometrics} onValueChange={setEnableBiometrics} />
       </View>
       <Pressable
@@ -2210,11 +2213,11 @@ describe("BiometricLogin", () => {
     const onLoginSuccess = jest.fn();
 
     render(
-      <BiometricLogin onLoginSuccess={onLoginSuccess} onCancel={jest.fn()} />
+      <BiometricLogin onLoginSuccess={onLoginSuccess} onCancel={jest.fn()} />,
     );
 
     await waitFor(() =>
-      expect(onLoginSuccess).toHaveBeenCalledWith("a@b.com", "pw")
+      expect(onLoginSuccess).toHaveBeenCalledWith("a@b.com", "pw"),
     );
 
     Object.defineProperty(Platform, "OS", { get: () => originalOS });
@@ -2289,7 +2292,7 @@ export function BiometricLogin({
   } = useBiometrics();
 
   const [biometryType, setBiometryType] = useState<BiometricType>(
-    BiometricType.NONE
+    BiometricType.NONE,
   );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -2307,9 +2310,7 @@ export function BiometricLogin({
 
       const availability = await checkAvailability();
       if (!availability.isAvailable) {
-        setError(
-          "Biometrische verificatie is niet beschikbaar op dit toestel"
-        );
+        setError("Biometrische verificatie is niet beschikbaar op dit toestel");
         setLoading(false);
         return;
       }
@@ -2366,9 +2367,7 @@ export function BiometricLogin({
   }
 
   return (
-    <View
-      style={[styles.card, { backgroundColor: colors.backgroundElement }]}
-    >
+    <View style={[styles.card, { backgroundColor: colors.backgroundElement }]}>
       <Text style={[styles.title, { color: colors.text }]}>
         Login met {getBiometricName(biometryType, true)}
       </Text>
@@ -2435,11 +2434,13 @@ EOF
 ## Task 8: Login screen
 
 **Files:**
+
 - Create: `src/hooks/useToast.ts`
 - Create: `src/app/login.tsx`
 - Create: `src/__tests__/app/login.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `useAuth()` (Task 4), `useBiometrics()` (Task 5), `BiometricOptIn` (Task 7), `secureStorage`/`RECENT_LOGOUT_KEY` (Task 2), `Colors`/`Spacing` (Phase 0).
 - Produces: `useToast()` returning `{ showToast: (message: string, type?: "error" | "success") => void }` — the error-UI pattern `docs/STATE_MANAGEMENT.md` flagged as not-yet-decided; this screen establishes it. Default-exported `Login` screen component at the `/login` route.
 
@@ -2498,7 +2499,7 @@ function renderLogin() {
       <AuthProvider>
         <Login />
       </AuthProvider>
-    </QueryClientProvider>
+    </QueryClientProvider>,
   );
 }
 
@@ -2529,8 +2530,8 @@ describe("Login screen", () => {
     await waitFor(() =>
       expect(Alert.alert).toHaveBeenCalledWith(
         "Fout",
-        "Vul alstublieft alle velden in"
-      )
+        "Vul alstublieft alle velden in",
+      ),
     );
   });
 
@@ -2546,14 +2547,12 @@ describe("Login screen", () => {
     fireEvent.changeText(getByTestId("login-password"), "pw");
     fireEvent.press(getByTestId("login-submit"));
 
-    await waitFor(() =>
-      expect(mockReplace).toHaveBeenCalledWith("/dashboard")
-    );
+    await waitFor(() => expect(mockReplace).toHaveBeenCalledWith("/dashboard"));
   });
 
   it("shows the API's error message on failed login", async () => {
     (authService.login as jest.Mock).mockRejectedValue(
-      new Error("Inloggegevens onjuist")
+      new Error("Inloggegevens onjuist"),
     );
 
     const { getByTestId } = renderLogin();
@@ -2563,10 +2562,7 @@ describe("Login screen", () => {
     fireEvent.press(getByTestId("login-submit"));
 
     await waitFor(() =>
-      expect(Alert.alert).toHaveBeenCalledWith(
-        "Fout",
-        "Inloggegevens onjuist"
-      )
+      expect(Alert.alert).toHaveBeenCalledWith("Fout", "Inloggegevens onjuist"),
     );
   });
 });
@@ -2631,7 +2627,7 @@ export default function Login() {
   const [biometricAvailable, setBiometricAvailable] = useState(false);
   const [credentialsStored, setCredentialsStored] = useState(false);
   const [biometricType, setBiometricType] = useState<BiometricType>(
-    BiometricType.NONE
+    BiometricType.NONE,
   );
   const [isAfterLogout, setIsAfterLogout] = useState(false);
 
@@ -2643,7 +2639,7 @@ export default function Login() {
 
   const handleBiometricLoginSuccess = async (
     username: string,
-    password: string
+    password: string,
   ) => {
     try {
       setIsLoggingIn(true);
@@ -2659,7 +2655,7 @@ export default function Login() {
     } catch (error) {
       showToast(
         error instanceof Error ? error.message : "Biometrische login mislukt",
-        "error"
+        "error",
       );
     } finally {
       setIsLoggingIn(false);
@@ -2669,7 +2665,7 @@ export default function Login() {
   const handleDirectBiometricAuth = async (
     isManualTrigger: boolean,
     knownCredentials?: BiometricCredentials | null,
-    knownBiometryType?: BiometricType
+    knownBiometryType?: BiometricType,
   ) => {
     if (!isManualTrigger) {
       const recentLogout = await secureStorage.getItem(RECENT_LOGOUT_KEY);
@@ -2695,7 +2691,7 @@ export default function Login() {
     if (authenticated) {
       await handleBiometricLoginSuccess(
         credentials.username,
-        credentials.password
+        credentials.password,
       );
     }
   };
@@ -2732,11 +2728,7 @@ export default function Login() {
         return;
       }
 
-      handleDirectBiometricAuth(
-        false,
-        credentials,
-        availability.biometryType
-      );
+      handleDirectBiometricAuth(false, credentials, availability.biometryType);
     };
 
     initialize();
@@ -2780,7 +2772,7 @@ export default function Login() {
         error instanceof Error
           ? error.message
           : "Een onverwachte fout is opgetreden tijdens het inloggen",
-        "error"
+        "error",
       );
     } finally {
       setIsLoggingIn(false);
@@ -2789,9 +2781,7 @@ export default function Login() {
 
   if (showBiometricOptIn) {
     return (
-      <View
-        style={[styles.container, { backgroundColor: colors.background }]}
-      >
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
         <BiometricOptIn
           username={email}
           password={password}
@@ -2955,6 +2945,7 @@ EOF
 ## Task 9: Navigation wiring
 
 **Files:**
+
 - Create: `src/app/reset.tsx`
 - Create: `src/app/password-reset.tsx`
 - Modify: `src/app/_layout.tsx`
@@ -2963,6 +2954,7 @@ EOF
 - Modify: `src/__tests__/dashboard.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `queryClient` (Task 1), `AuthProvider`/`useAuthContext` (Task 4), `useSessionManager` (Task 6), `useAuth` (Task 4), `PlaceholderScreen` (Phase 0).
 
 This is the task that makes every earlier task in this phase actually reachable from a cold app launch.
@@ -3059,22 +3051,22 @@ import { useAuth } from "@/hooks/useAuth";
 Inside `CustomDrawerContent`, add the hook call alongside the existing `colors` line:
 
 ```tsx
-  const { logout } = useAuth();
+const { logout } = useAuth();
 ```
 
 Replace the "Uitloggen" `DrawerItem`'s `onPress`:
 
 ```tsx
-      <DrawerItem
-        label="Uitloggen"
-        icon={({ size }) => (
-          <Ionicons name="log-out-outline" size={size} color={colors.danger} />
-        )}
-        labelStyle={{ color: colors.danger }}
-        onPress={() => {
-          logout();
-        }}
-      />
+<DrawerItem
+  label="Uitloggen"
+  icon={({ size }) => (
+    <Ionicons name="log-out-outline" size={size} color={colors.danger} />
+  )}
+  labelStyle={{ color: colors.danger }}
+  onPress={() => {
+    logout();
+  }}
+/>
 ```
 
 (Replaces the Phase 0 placeholder comment + no-op `onPress={() => {}}`.)
@@ -3117,7 +3109,7 @@ describe("root redirect", () => {
     renderRouter("src/app", { initialUrl: "/" });
 
     expect(
-      await screen.findByText(/Bouwt in een latere fase/i)
+      await screen.findByText(/Wordt in latere fase gemaakt/i),
     ).toBeOnTheScreen();
   });
 });
@@ -3126,7 +3118,7 @@ it("renders the dashboard placeholder at /dashboard directly", async () => {
   (authService.isAuthenticated as jest.Mock).mockResolvedValue(true);
   renderRouter("src/app", { initialUrl: "/dashboard" });
   expect(
-    await screen.findByText(/Bouwt in een latere fase/i)
+    await screen.findByText(/Wordt in latere fase gemaakt/i),
   ).toBeOnTheScreen();
 });
 ```
@@ -3228,4 +3220,3 @@ Summarize what Phase 1 produced and link the PR. Phase 1b (push notifications + 
 - **No placeholders** except the two screens explicitly designed to be placeholders (Reset/PasswordReset), which is the deliberate, design-doc-approved outcome, not an oversight.
 - **Naming consistency:** `secureStorage`, the 8 key constants, `BiometricType`, `UseBiometrics`, and `useAuth()`'s return shape are spelled identically everywhere they're consumed across Tasks 2-9.
 - **Documented, forced deviations from a faithful port** (both already called out at point of use, repeated here for visibility): `isLoading` on `AuthContext` (no sync storage read in RN); two genuinely dead methods dropped from the biometrics service (`deleteCredentials`, `getBiometricType`); one dead state value dropped from the source's `useBiometrics` (`availability`, set but never read). Everything else is a 1:1 port.
-

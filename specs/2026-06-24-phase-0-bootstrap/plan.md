@@ -64,6 +64,7 @@ paperwork-app-native/
 ## Task 1: Scaffold the Expo app and verify the toolchain
 
 **Files:**
+
 - Create: entire Expo project skeleton (`package.json`, `app.json`, `tsconfig.json`, `src/app/index.tsx`, etc.)
 
 - [ ] **Step 1: Create the working branch**
@@ -111,11 +112,13 @@ EOF
 ## Task 2: Testing tooling + theme tokens
 
 **Files:**
+
 - Create: `src/constants/theme.ts`
 - Create: `src/__tests__/theme.test.ts`
 - Modify: `package.json` (add `test` script, `jest` config, new devDependencies)
 
 **Interfaces:**
+
 - Produces: `Colors.light`, `Colors.dark` (each an object with keys `primary`, `secondary`, `tertiary`, `success`, `warning`, `danger`, `background`, `text`, `backgroundElement`, `textSecondary`, all `string` hex values) and `Spacing` (object with keys `half`/`one`/`two`/`three`/`four`/`five`/`six`, `number` values). Every later task that styles a screen imports these from `@/constants/theme`.
 
 - [ ] **Step 1: Install testing dependencies**
@@ -152,7 +155,7 @@ import { Colors, Spacing } from "@/constants/theme";
 describe("Colors", () => {
   it("defines the same set of keys for light and dark", () => {
     expect(Object.keys(Colors.dark).sort()).toEqual(
-      Object.keys(Colors.light).sort()
+      Object.keys(Colors.light).sort(),
     );
   });
 
@@ -189,7 +192,7 @@ Expected: FAIL — `Cannot find module '@/constants/theme'` (the file doesn't ex
 
 - [ ] **Step 5: Implement the theme tokens**
 
-These color values are not invented — they're `paperwork-app`'s actual rendered colors: Ionic's stock default light/dark palette, read directly from `node_modules/@ionic/core/css/core.css` and `node_modules/@ionic/core/css/palettes/dark.system.css` in that repo (it has zero color-variable overrides in `src/theme/variables.css`, so the stock palette is exactly what renders today). Note Ionic's light/dark semantic colors named "light" and "dark" represent lightest/darkest *surface* roles and invert between modes — not used here to avoid that confusion; this module uses plain `background`/`backgroundElement`/`text`/`textSecondary` names instead.
+These color values are not invented — they're `paperwork-app`'s actual rendered colors: Ionic's stock default light/dark palette, read directly from `node_modules/@ionic/core/css/core.css` and `node_modules/@ionic/core/css/palettes/dark.system.css` in that repo (it has zero color-variable overrides in `src/theme/variables.css`, so the stock palette is exactly what renders today). Note Ionic's light/dark semantic colors named "light" and "dark" represent lightest/darkest _surface_ roles and invert between modes — not used here to avoid that confusion; this module uses plain `background`/`backgroundElement`/`text`/`textSecondary` names instead.
 
 Create `src/constants/theme.ts`:
 
@@ -267,6 +270,7 @@ EOF
 ## Task 3: Navigation skeleton (drawer + nested tabs)
 
 **Files:**
+
 - Create: `src/components/PlaceholderScreen.tsx`
 - Create: `src/app/_layout.tsx`
 - Create: `src/app/(drawer)/_layout.tsx`
@@ -275,6 +279,7 @@ EOF
 - Create: `src/__tests__/dashboard.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `Colors`, `Spacing` from `@/constants/theme` (Task 2).
 - Produces: a navigable app — `/dashboard`, `/expenses`, `/invoices`, `/emails`, `/contacts` have visible tab buttons; `/taxes`, `/notifications`, `/profile`, `/settings` are reachable via the drawer only, no tab button, but the tab bar still renders on those screens (matching `paperwork-app`'s `privateRoutes.tsx`, where every authenticated route renders the same `IonTabBar`).
 
@@ -324,7 +329,7 @@ export function PlaceholderScreen({ title }: PlaceholderScreenProps) {
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
       <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-        Bouwt in een latere fase
+        Wordt in latere fase gemaakt
       </Text>
     </View>
   );
@@ -547,7 +552,11 @@ const MENU_ITEMS: MenuItem[] = [
   { label: "Emails", route: "emails", icon: "mail-outline" },
   { label: "Contacten", route: "contacts", icon: "people-outline" },
   { label: "Belasting", route: "taxes", icon: "calculator-outline" },
-  { label: "Notificaties", route: "notifications", icon: "notifications-outline" },
+  {
+    label: "Notificaties",
+    route: "notifications",
+    icon: "notifications-outline",
+  },
 ];
 
 function CustomDrawerContent(props: DrawerContentComponentProps) {
@@ -566,7 +575,11 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
       <DrawerItem
         label="Profiel"
         icon={({ size }) => (
-          <Ionicons name="person-circle-outline" size={size} color={colors.text} />
+          <Ionicons
+            name="person-circle-outline"
+            size={size}
+            color={colors.text}
+          />
         )}
         labelStyle={{ color: colors.text }}
         onPress={() => props.navigation.navigate("profile")}
@@ -670,6 +683,7 @@ EOF
 ## Task 4: Claude tooling
 
 **Files:**
+
 - Create: `AGENTS.md`
 - Create: `CLAUDE.md`
 - Create: `docs/ARCHITECTURE.md`
@@ -744,7 +758,7 @@ owners of small businesses and independent contractors in the
 Full migration context (strategy, phase roadmap, architecture decisions,
 the spike findings this app's choices are based on) lives in
 `paperwork-app`'s `specs/2026-06-24-paperwork-app-native-migration/design.md`
-— read it for *why*, not just *what*.
+— read it for _why_, not just _what_.
 
 Features, ported incrementally phase by phase: manage expenses; scan
 receipts into an expense; manage and generate invoices (PDF); manage
@@ -755,8 +769,8 @@ export for tax returns.
 
 Load the right doc for the task instead of reading everything:
 
-| Topic | File | When to read |
-|-------|------|-------------|
+| Topic                    | File                                         | When to read                                                |
+| ------------------------ | -------------------------------------------- | ----------------------------------------------------------- |
 | Architecture & structure | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | App structure, routing, folder layout, where a file belongs |
 
 Other topics (state/data layer, frontend component patterns, native
@@ -1045,7 +1059,7 @@ native plugins) gets its own brainstorm/spec/plan cycle next.
   the persistent tab bar) is resolved in Task 3 via `href: null` rather
   than left open.
 - **No placeholders except the screens themselves**, which are
-  *intentional* placeholders per the design doc — every file path, color
+  _intentional_ placeholders per the design doc — every file path, color
   value, and command is concrete and sourced (Ionic's actual default
   palette, not invented).
 - **Naming consistency:** `PlaceholderScreen`, `Colors`, `Spacing`,
