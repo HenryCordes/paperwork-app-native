@@ -5,6 +5,7 @@ import type { DrawerContentComponentProps } from "expo-router/drawer";
 import { DrawerContentScrollView, DrawerItem } from "expo-router/drawer";
 
 import { Colors, Spacing } from "@/constants/theme";
+import { useAuth } from "@/hooks/useAuth";
 
 interface MenuItem {
   label: string;
@@ -25,6 +26,7 @@ const MENU_ITEMS: MenuItem[] = [
 function CustomDrawerContent(props: DrawerContentComponentProps) {
   const scheme = useColorScheme();
   const colors = Colors[scheme === "dark" ? "dark" : "light"];
+  const { logout } = useAuth();
 
   return (
     <DrawerContentScrollView
@@ -62,9 +64,9 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
           <Ionicons name="log-out-outline" size={size} color={colors.danger} />
         )}
         labelStyle={{ color: colors.danger }}
-        // Phase 1 wires this to real auth/logout. Intentionally a no-op
-        // placeholder until then.
-        onPress={() => {}}
+        onPress={() => {
+          logout();
+        }}
       />
     </DrawerContentScrollView>
   );

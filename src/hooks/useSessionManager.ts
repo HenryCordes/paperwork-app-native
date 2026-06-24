@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { AppState, AppStateStatus, Platform } from "react-native";
-import { Href, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 
 import { useBiometrics } from "./biometrics/useBiometrics";
 import { useAuth } from "./useAuth";
@@ -122,9 +122,7 @@ export const useSessionManager = () => {
         // login rather than retrying silently.
       }
     } else {
-      // Cast needed: typed routes don't yet know about "/login" since the
-      // login screen lands in a later task of this phase.
-      router.replace("/login" as Href);
+      router.replace("/login");
       await setAuthInProgress(false);
     }
   }, [

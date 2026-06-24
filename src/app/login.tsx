@@ -8,7 +8,7 @@ import {
   View,
   useColorScheme,
 } from "react-native";
-import { Href, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 
 import { useAuth } from "@/hooks/useAuth";
 import { useBiometrics } from "@/hooks/biometrics/useBiometrics";
@@ -281,9 +281,7 @@ export default function Login() {
       )}
 
       <Pressable
-        // Cast needed: typed routes don't yet know about "/reset" since the
-        // password-reset screen doesn't exist yet (later task).
-        onPress={() => router.push("/reset" as Href)}
+        onPress={() => router.push("/reset")}
         style={styles.forgotPassword}
       >
         <Text style={{ color: colors.textSecondary }}>
