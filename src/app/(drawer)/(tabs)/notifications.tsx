@@ -1,5 +1,5 @@
 import { PlaceholderScreen } from "@/components/PlaceholderScreen";
 
-export default function NotificationsScreen() {
+export default function Notifications() {
   return <PlaceholderScreen title="Notificaties" />;
 }

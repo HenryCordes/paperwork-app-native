@@ -1,5 +1,5 @@
 import { PlaceholderScreen } from "@/components/PlaceholderScreen";
 
-export default function SettingsScreen() {
+export default function Settings() {
   return <PlaceholderScreen title="Instellingen" />;
 }

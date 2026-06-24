@@ -1,5 +1,5 @@
 import { PlaceholderScreen } from "@/components/PlaceholderScreen";
 
-export default function DashboardScreen() {
+export default function Dashboard() {
   return <PlaceholderScreen title="Dashboard" />;
 }

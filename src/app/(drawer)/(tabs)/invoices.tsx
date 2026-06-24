@@ -1,5 +1,5 @@
 import { PlaceholderScreen } from "@/components/PlaceholderScreen";
 
-export default function InvoicesScreen() {
+export default function Invoices() {
   return <PlaceholderScreen title="Facturen" />;
 }

@@ -1,5 +1,5 @@
 import { PlaceholderScreen } from "@/components/PlaceholderScreen";
 
-export default function EmailsScreen() {
+export default function Emails() {
   return <PlaceholderScreen title="Emails" />;
 }
