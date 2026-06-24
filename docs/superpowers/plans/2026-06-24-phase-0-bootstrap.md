@@ -83,14 +83,14 @@ npx create-expo-app@latest .
 
 Expected: a TypeScript Expo project is created in the current directory. **Verification checkpoint:** check whether routes landed at `src/app/` or `app/` (the spike produced `src/app/` today; the default template can change). Every file path in this plan assumes `src/app/` — if you get `app/` instead, use that path throughout the rest of this plan and note the deviation in this task's own commit message (Step 4 below).
 
-- [ ] **Step 3: Generate native projects and verify the app runs**
+- [ ] **Step 3: Generate native projects and typecheck**
 
 ```bash
 npx expo prebuild
-npx expo run:ios
+npx tsc --noEmit
 ```
 
-Expected: Metro starts, the iOS Simulator launches, and the default Expo template welcome screen renders. `ios/` and `android/` are generated but already gitignored by the template's default `.gitignore` (generated, not committed).
+Expected: `prebuild` generates `ios/` and `android/` with no errors (already gitignored by the template's default `.gitignore` — generated, not committed); `tsc` reports no type errors. This is the automated check for this task — actually launching the app in a simulator is a manual, visual check the user can run themselves with `npx expo run:ios` whenever they want to see it; it's not part of this task's automated loop.
 
 - [ ] **Step 4: Commit**
 
@@ -648,15 +648,9 @@ npm test
 
 Expected: PASS.
 
-- [ ] **Step 9: Manually verify in the simulator**
+No simulator check here — the RNTL test in Step 1 is the automated signal for this task. If you (the user) want to see the drawer/tabs/dark-mode rendering for yourself, run `npx expo run:ios` and navigate it manually any time; that's not part of this task's loop.
 
-```bash
-npx expo run:ios
-```
-
-Navigate to each of the 5 tab buttons, open the drawer and navigate to Taxes/Notificaties/Profiel, and toggle the simulator's appearance (Settings > Developer > Dark Appearance, or `Cmd+Shift+A` in the simulator) to confirm both light and dark render with the correct colors from `theme.ts`.
-
-- [ ] **Step 10: Commit**
+- [ ] **Step 9: Commit**
 
 ```bash
 git add src/app src/components/PlaceholderScreen.tsx src/__tests__/dashboard.test.tsx package.json package-lock.json
@@ -988,11 +982,11 @@ EOF
 ```bash
 npx tsc --noEmit
 npm test
-npx expo run:ios
 ```
 
-Expected: typecheck clean, all tests pass, app launches and the drawer/tabs
-navigation from Task 3 still works in both light and dark appearance.
+Expected: typecheck clean, all tests pass. No simulator launch here — that's
+a manual, visual check; run `npx expo run:ios` yourself if/when you want to
+see the drawer/tabs navigation and dark-mode rendering in person.
 
 - [ ] **Step 2: Confirm working tree is clean**
 
