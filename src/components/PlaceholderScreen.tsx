@@ -14,7 +14,7 @@ export function PlaceholderScreen({ title }: PlaceholderScreenProps) {
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
       <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-        Bouwt in een latere fase
+        Wordt in latere fase gemaakt
       </Text>
     </View>
   );
