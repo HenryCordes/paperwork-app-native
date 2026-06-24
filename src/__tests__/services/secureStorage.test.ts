@@ -39,7 +39,7 @@ describe("secureStorage", () => {
     Object.defineProperty(Platform, "OS", { get: () => "web" });
 
     const store: Record<string, string> = {};
-    (global as { localStorage?: Storage }).localStorage = {
+    (globalThis as { localStorage?: Storage }).localStorage = {
       getItem: (k: string) => store[k] ?? null,
       setItem: (k: string, v: string) => {
         store[k] = v;
