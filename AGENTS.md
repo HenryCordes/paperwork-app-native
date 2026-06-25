@@ -32,12 +32,8 @@ Load the right doc for the task instead of reading everything:
 | State & data layer | [docs/STATE_MANAGEMENT.md](docs/STATE_MANAGEMENT.md) | Fetching/mutating data, adding an API service or hook, query keys |
 | Frontend | [docs/FRONTEND.md](docs/FRONTEND.md) | Building screens, styling, render/list performance |
 | Native functionality | [docs/NATIVE.md](docs/NATIVE.md) | Camera, scanner, OCR, secure storage, biometric, push, badge |
+| Receipt parsing | [docs/RECEIPT_PARSING.md](docs/RECEIPT_PARSING.md) | Changing the OCR rule engine, detectors, or merchant-specific handling |
 | Testing | [docs/TESTING.md](docs/TESTING.md) | Writing or changing tests |
-
-Receipt parsing has no doc yet — it's deferred to the phase that actually
-builds the rule engine in RN, since paperwork-app's `RECEIPT_PARSING.md`
-documents specific detector/rule-engine internals that don't exist here
-yet and a guess now would just be wrong later.
 
 ## Tech Stack
 
