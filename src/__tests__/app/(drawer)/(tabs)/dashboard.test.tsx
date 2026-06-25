@@ -5,6 +5,14 @@ import { useDashboardStats } from "@/hooks/useDashboard";
 
 jest.mock("@/hooks/useDashboard");
 
+// Bug: on a real device the period-label header rendered flush against the
+// top edge, under the status bar/notch - no screen in this app reads safe-area
+// insets. Mock a non-zero top inset so the regression test below can assert
+// the screen actually accounts for it, the same way it would on a real device.
+jest.mock("react-native-safe-area-context", () => ({
+  useSafeAreaInsets: () => ({ top: 47, bottom: 0, left: 0, right: 0 }),
+}));
+
 function mockStats(
   overrides: Partial<Omit<ReturnType<typeof useDashboardStats>, "error">> & {
     error?: Error | null;
@@ -132,5 +140,13 @@ describe("Dashboard screen", () => {
     expect(queryByText("Per")).toBeNull();
     fireEvent.press(getByLabelText("Periode wijzigen"));
     expect(queryByText("Per")).toBeTruthy();
+  });
+
+  it("pads the top of the screen by the safe-area inset so the header isn't hidden behind the status bar", () => {
+    mockStats({});
+    const { getByTestId } = render(<Dashboard />);
+
+    // 47 (mocked inset) + 16 (Spacing.three, the screen's own base padding)
+    expect(getByTestId("dashboard-screen")).toHaveStyle({ paddingTop: 63 });
   });
 });

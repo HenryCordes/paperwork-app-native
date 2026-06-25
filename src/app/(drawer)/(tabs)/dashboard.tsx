@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, View, useColorScheme } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useDashboardStats } from "@/hooks/useDashboard";
 import { FinancialChart } from "@/components/charts/FinancialChart";
@@ -51,6 +52,7 @@ function periodLabel(periodType: PeriodType, periodPreset: PeriodPreset): string
 export default function Dashboard() {
   const scheme = useColorScheme();
   const colors = Colors[scheme === "dark" ? "dark" : "light"];
+  const insets = useSafeAreaInsets();
 
   const [showPeriodSelector, setShowPeriodSelector] = useState(false);
   const [periodType, setPeriodType] = useState<PeriodType>(PERIOD_TYPES.MONTHLY);
@@ -71,7 +73,13 @@ export default function Dashboard() {
   const summary = summarize(data?.data.rawData);
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View
+      testID="dashboard-screen"
+      style={[
+        styles.container,
+        { backgroundColor: colors.background, paddingTop: insets.top + Spacing.three },
+      ]}
+    >
       <View style={styles.header}>
         <Text style={[styles.title, { color: colors.text }]}>
           {periodLabel(periodType, periodPreset)}
