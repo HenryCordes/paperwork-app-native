@@ -1,6 +1,6 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, useColorScheme } from "react-native";
 
-import { Spacing } from "@/constants/theme";
+import { Colors, Spacing } from "@/constants/theme";
 
 export interface ChartLegendItem {
   color: string;
@@ -13,12 +13,15 @@ interface ChartLegendProps {
 }
 
 export function ChartLegend({ items }: ChartLegendProps) {
+  const scheme = useColorScheme();
+  const colors = Colors[scheme === "dark" ? "dark" : "light"];
+
   return (
     <View style={styles.row}>
       {items.map((item) => (
         <View key={item.label} style={styles.item}>
           <View style={[styles.swatch, { backgroundColor: item.color }]} />
-          <Text>
+          <Text style={{ color: colors.text }}>
             {item.label}: {item.value}
           </Text>
         </View>
