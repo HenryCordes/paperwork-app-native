@@ -149,4 +149,14 @@ describe("Dashboard screen", () => {
     // 47 (mocked inset) + 16 (Spacing.three, the screen's own base padding)
     expect(getByTestId("dashboard-screen")).toHaveStyle({ paddingTop: 63 });
   });
+
+  // Bug: the screen's content (header, summary cards, both charts and their
+  // legends) has no scroll container anywhere in its ancestor chain, so on a
+  // real device anything past the viewport height - the pie chart and its
+  // legend, in practice - was simply laid out off-screen, not missing.
+  it("wraps its content in a scroll view so charts below the fold are reachable", () => {
+    mockStats({});
+    const { getByTestId } = render(<Dashboard />);
+    expect(getByTestId("dashboard-scroll")).toBeTruthy();
+  });
 });

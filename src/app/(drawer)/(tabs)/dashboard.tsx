@@ -1,5 +1,12 @@
 import { useState } from "react";
-import { Pressable, StyleSheet, Text, View, useColorScheme } from "react-native";
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  useColorScheme,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useDashboardStats } from "@/hooks/useDashboard";
@@ -80,72 +87,77 @@ export default function Dashboard() {
         { backgroundColor: colors.background, paddingTop: insets.top + Spacing.three },
       ]}
     >
-      <View style={styles.header}>
-        <Text style={[styles.title, { color: colors.text }]}>
-          {periodLabel(periodType, periodPreset)}
-        </Text>
-        <Pressable
-          accessibilityLabel="Periode wijzigen"
-          onPress={() => setShowPeriodSelector((current) => !current)}
-        >
-          <Text style={{ color: colors.primary }}>Periode</Text>
-        </Pressable>
-      </View>
+      <ScrollView
+        testID="dashboard-scroll"
+        contentContainerStyle={styles.scrollContent}
+      >
+        <View style={styles.header}>
+          <Text style={[styles.title, { color: colors.text }]}>
+            {periodLabel(periodType, periodPreset)}
+          </Text>
+          <Pressable
+            accessibilityLabel="Periode wijzigen"
+            onPress={() => setShowPeriodSelector((current) => !current)}
+          >
+            <Text style={{ color: colors.primary }}>Periode</Text>
+          </Pressable>
+        </View>
 
-      {showPeriodSelector ? (
-        <PeriodSelector
-          periodType={periodType}
-          periodPreset={periodPreset}
-          onPeriodChange={handlePeriodChange}
-        />
-      ) : null}
-
-      {isLoading ? (
-        <Text style={{ color: colors.textSecondary }}>Laden...</Text>
-      ) : isError ? (
-        <Text style={{ color: colors.danger }}>
-          {error instanceof Error
-            ? error.message
-            : "Kan dashboardgegevens niet laden. Probeer het opnieuw."}
-        </Text>
-      ) : (
-        <>
-          <View style={styles.summaryRow}>
-            <View style={styles.summaryCard}>
-              <Text style={{ color: colors.primary }}>Omzet</Text>
-              <Text style={{ color: colors.text }}>
-                €{formatCurrency(summary.totalRevenue)}
-              </Text>
-            </View>
-            <View style={styles.summaryCard}>
-              <Text style={{ color: colors.danger }}>Uitgaven</Text>
-              <Text style={{ color: colors.text }}>
-                €{formatCurrency(summary.totalExpenses)}
-              </Text>
-            </View>
-            <View style={styles.summaryCard}>
-              <Text
-                style={{
-                  color: summary.netProfit >= 0 ? colors.success : colors.danger,
-                }}
-              >
-                {summary.netProfit >= 0 ? "Winst" : "Verlies"}
-              </Text>
-              <Text style={{ color: colors.text }}>
-                €{formatCurrency(summary.netProfit)}
-              </Text>
-            </View>
-          </View>
-
-          <FinancialChart
-            labels={data?.data.labels ?? []}
-            turnover={data?.data.turnover ?? []}
-            expenses={data?.data.expenses ?? []}
+        {showPeriodSelector ? (
+          <PeriodSelector
+            periodType={periodType}
+            periodPreset={periodPreset}
+            onPeriodChange={handlePeriodChange}
           />
+        ) : null}
 
-          <PieChart revenue={summary.totalRevenue} expenses={summary.totalExpenses} />
-        </>
-      )}
+        {isLoading ? (
+          <Text style={{ color: colors.textSecondary }}>Laden...</Text>
+        ) : isError ? (
+          <Text style={{ color: colors.danger }}>
+            {error instanceof Error
+              ? error.message
+              : "Kan dashboardgegevens niet laden. Probeer het opnieuw."}
+          </Text>
+        ) : (
+          <>
+            <View style={styles.summaryRow}>
+              <View style={styles.summaryCard}>
+                <Text style={{ color: colors.primary }}>Omzet</Text>
+                <Text style={{ color: colors.text }}>
+                  €{formatCurrency(summary.totalRevenue)}
+                </Text>
+              </View>
+              <View style={styles.summaryCard}>
+                <Text style={{ color: colors.danger }}>Uitgaven</Text>
+                <Text style={{ color: colors.text }}>
+                  €{formatCurrency(summary.totalExpenses)}
+                </Text>
+              </View>
+              <View style={styles.summaryCard}>
+                <Text
+                  style={{
+                    color: summary.netProfit >= 0 ? colors.success : colors.danger,
+                  }}
+                >
+                  {summary.netProfit >= 0 ? "Winst" : "Verlies"}
+                </Text>
+                <Text style={{ color: colors.text }}>
+                  €{formatCurrency(summary.netProfit)}
+                </Text>
+              </View>
+            </View>
+
+            <FinancialChart
+              labels={data?.data.labels ?? []}
+              turnover={data?.data.turnover ?? []}
+              expenses={data?.data.expenses ?? []}
+            />
+
+            <PieChart revenue={summary.totalRevenue} expenses={summary.totalExpenses} />
+          </>
+        )}
+      </ScrollView>
     </View>
   );
 }
@@ -153,8 +165,11 @@ export default function Dashboard() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: Spacing.three,
+    paddingHorizontal: Spacing.three,
+  },
+  scrollContent: {
     gap: Spacing.three,
+    paddingBottom: Spacing.three,
   },
   header: {
     flexDirection: "row",
