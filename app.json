@@ -37,7 +37,13 @@
           }
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "react-native-document-scanner-plugin",
+        {
+          "cameraPermission": "Paperwork heeft toegang tot je camera nodig om bonnen te kunnen scannen."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
