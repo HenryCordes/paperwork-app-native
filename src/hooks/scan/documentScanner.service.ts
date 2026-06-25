@@ -13,7 +13,7 @@ export async function scanDocument(): Promise<DocumentScanResult | null> {
     maxNumDocuments: 1,
   });
 
-  if (status === "cancel" || scannedImages.length === 0) {
+  if (status === "cancel" || !scannedImages || scannedImages.length === 0) {
     return null;
   }
 

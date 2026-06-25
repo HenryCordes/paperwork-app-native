@@ -216,6 +216,8 @@ EOF
 
 API verified against [the package's README](https://github.com/WebsiteBeaver/react-native-document-scanner-plugin): `DocumentScanner.scanDocument(options?)` returns `Promise<{ scannedImages: string[], status: 'success' | 'cancel' }>`. `maxNumDocuments` is documented as **Android-only**.
 
+**Correction, found during implementation:** the README summary above is imprecise — the package's actual shipped type definitions (`node_modules/react-native-document-scanner-plugin/lib/typescript/src/NativeDocumentScanner.d.ts`) declare both fields optional: `scannedImages?: string[]` and `status?: ScanDocumentResponseStatus`. The non-optional shape above caused a real `tsc --noEmit` failure (`'scannedImages' is possibly 'undefined'`) that neither Task 2's implementer nor its reviewer caught, since the plan never included an explicit typecheck step for this task (only Task 1 and Task 6 did) — fixed below, and added retroactively to Tasks 2, 3, and 5's verification steps.
+
 **Verification checkpoint:** design.md calls for a distinct Dutch message on camera-permission denial, separate from the silent user-cancel path. The docs consulted don't say whether a denied permission surfaces as a rejected promise (caught by `useScan`'s generic Dutch error) or as `status: 'cancel'` (indistinguishable from a real cancel, so silent). Confirm which one during the design's on-device validation step; if it's the latter and a distinct message is genuinely needed, the fix is a platform permission pre-check here, not a redesign.
 
 - [ ] **Step 1: Install the dependency and configure the Expo plugin**
@@ -338,7 +340,7 @@ export async function scanDocument(): Promise<DocumentScanResult | null> {
     maxNumDocuments: 1,
   });
 
-  if (status === "cancel" || scannedImages.length === 0) {
+  if (status === "cancel" || !scannedImages || scannedImages.length === 0) {
     return null;
   }
 
@@ -353,6 +355,14 @@ npm test -- documentScanner.service
 ```
 
 Expected: PASS, 4 tests.
+
+- [ ] **Step 5b: Typecheck**
+
+```bash
+npx tsc --noEmit
+```
+
+Expected: clean. The package's real type definitions mark both `scannedImages` and `status` optional (`scannedImages?: string[]`, `status?: ScanDocumentResponseStatus`) despite the README's non-optional summary above — the implementation must guard `!scannedImages` (not just `.length === 0`) or this fails with `'scannedImages' is possibly 'undefined'`.
 
 - [ ] **Step 6: Verify the native config**
 
@@ -528,6 +538,14 @@ npm test -- ocr.service
 ```
 
 Expected: PASS, 3 tests.
+
+- [ ] **Step 5b: Typecheck**
+
+```bash
+npx tsc --noEmit
+```
+
+Expected: clean.
 
 - [ ] **Step 6: Commit**
 
@@ -751,6 +769,14 @@ npm test -- fileManagement.service
 
 Expected: PASS, 4 tests.
 
+- [ ] **Step 5b: Typecheck**
+
+```bash
+npx tsc --noEmit
+```
+
+Expected: clean. Also check the actual installed `expo-file-system` type definitions for `Directory.create()`'s return type before trusting the `await`-free call above — the docs consulted while writing this plan didn't confirm sync vs. async (see this task's verification checkpoint). Running this repo-wide typecheck is also what caught Task 2's real bug (`scannedImages` is optional in the installed package's actual types, not the non-optional shape its README summary implied) — `tsc --noEmit` was missing from Task 2 and Task 3's steps and is now added there too.
+
 - [ ] **Step 6: Commit**
 
 ```bash
@@ -958,6 +984,14 @@ npm test -- useScan
 ```
 
 Expected: PASS, 3 tests.
+
+- [ ] **Step 5b: Typecheck**
+
+```bash
+npx tsc --noEmit
+```
+
+Expected: clean.
 
 - [ ] **Step 6: Commit**
 
