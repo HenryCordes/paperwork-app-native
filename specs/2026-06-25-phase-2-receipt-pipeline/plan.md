@@ -834,6 +834,14 @@ import { recognizeText } from "@/hooks/scan/ocr.service";
 import { moveScannedImage } from "@/hooks/scan/fileManagement.service";
 import { extractReceiptInfo } from "@/hooks/receipt-parsing";
 
+// Automocking documentScanner.service still loads the real module once to
+// infer its shape, which imports react-native-document-scanner-plugin, and
+// that plugin calls TurboModuleRegistry.getEnforcing() eagerly at import
+// time - it throws outside a native runtime. Mock the plugin itself first.
+jest.mock("react-native-document-scanner-plugin", () => ({
+  __esModule: true,
+  default: { scanDocument: jest.fn() },
+}));
 jest.mock("@/hooks/scan/documentScanner.service");
 jest.mock("@/hooks/scan/ocr.service");
 jest.mock("@/hooks/scan/fileManagement.service");
@@ -1089,6 +1097,15 @@ import { render, fireEvent } from "@testing-library/react-native";
 import Expenses from "@/app/(drawer)/(tabs)/expenses";
 import { useScan } from "@/hooks/scan/useScan";
 
+// Same fix Task 5 needed: automocking useScan still loads the real module
+// once to infer its shape, which transitively imports
+// react-native-document-scanner-plugin - that plugin throws via
+// TurboModuleRegistry.getEnforcing() outside a native runtime unless it's
+// mocked first.
+jest.mock("react-native-document-scanner-plugin", () => ({
+  __esModule: true,
+  default: { scanDocument: jest.fn() },
+}));
 jest.mock("@/hooks/scan/useScan");
 
 describe("Expenses (Kosten) screen", () => {
