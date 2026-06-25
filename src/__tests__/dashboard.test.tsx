@@ -30,16 +30,12 @@ describe("root redirect", () => {
     (authService.isAuthenticated as jest.Mock).mockResolvedValue(true);
     renderRouter("src/app", { initialUrl: "/" });
 
-    expect(
-      await screen.findByText(/Wordt in latere fase gemaakt/i),
-    ).toBeOnTheScreen();
+    expect(await screen.findByText("Laden...")).toBeOnTheScreen();
   });
 });
 
-it("renders the dashboard placeholder at /dashboard directly", async () => {
+it("renders the dashboard screen at /dashboard directly", async () => {
   (authService.isAuthenticated as jest.Mock).mockResolvedValue(true);
   renderRouter("src/app", { initialUrl: "/dashboard" });
-  expect(
-    await screen.findByText(/Wordt in latere fase gemaakt/i),
-  ).toBeOnTheScreen();
+  expect(await screen.findByText("Laden...")).toBeOnTheScreen();
 });
