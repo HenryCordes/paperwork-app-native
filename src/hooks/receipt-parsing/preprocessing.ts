@@ -17,7 +17,7 @@ export const preprocessText = (
   const cleanedElements: string[] = [];
   const normalizedElements: TextElement[] = [];
   const numbers: number[] = [];
-  const areDebugging = import.meta.env.VITE_APP_DEBUG_MODE === "true";
+  const areDebugging = process.env.EXPO_PUBLIC_APP_DEBUG_MODE === "true";
   // First, determine the decimal separator format used across the entire receipt
   // by analyzing all text elements together
   const allText = elements.map((e) => e.text).join(" ");

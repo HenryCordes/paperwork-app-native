@@ -153,7 +153,7 @@ export const totalRules: ReceiptRule[] = [
       matchedConditions,
       formatInfo
     ): RuleResult | null => {
-      const areDebugging = import.meta.env.VITE_APP_DEBUG_MODE === "true";
+      const areDebugging = process.env.EXPO_PUBLIC_APP_DEBUG_MODE === "true";
       // This rule evaluates the entire receipt at once, but only runs once
       if (index === 0) {
         if (areDebugging) {
@@ -368,7 +368,7 @@ export const totalRules: ReceiptRule[] = [
     ): RuleResult | null => {
       // This rule works differently - it analyzes all elements
       // to find recurring € values, which are strong indicators of totals
-      const areDebugging = import.meta.env.VITE_APP_DEBUG_MODE === "true";
+      const areDebugging = process.env.EXPO_PUBLIC_APP_DEBUG_MODE === "true";
 
       if (index === 0) {
         // Only run once for the first element
@@ -432,7 +432,7 @@ export const totalRules: ReceiptRule[] = [
       matchedConditions,
       formatInfo
     ): RuleResult | null => {
-      const areDebugging = import.meta.env.VITE_APP_DEBUG_MODE === "true";
+      const areDebugging = process.env.EXPO_PUBLIC_APP_DEBUG_MODE === "true";
       if (areDebugging) {
         console.log(
           "[TE VOLDOEN Rule] Found at index " +
@@ -550,7 +550,7 @@ export const totalRules: ReceiptRule[] = [
       matchedConditions,
       formatInfo
     ): RuleResult | null => {
-      const areDebugging = import.meta.env.VITE_APP_DEBUG_MODE === "true";
+      const areDebugging = process.env.EXPO_PUBLIC_APP_DEBUG_MODE === "true";
       // This rule evaluates the entire receipt at once
       if (index === 0) {
         // Only run once for the first element
@@ -824,7 +824,7 @@ export const totalRules: ReceiptRule[] = [
       matchedConditions,
       formatInfo
     ): RuleResult | null => {
-      const areDebugging = import.meta.env.VITE_APP_DEBUG_MODE === "true";
+      const areDebugging = process.env.EXPO_PUBLIC_APP_DEBUG_MODE === "true";
       const isEuropeanFormat = formatInfo?.isEuropeanFormat !== false;
 
       // Extract the number from the current line

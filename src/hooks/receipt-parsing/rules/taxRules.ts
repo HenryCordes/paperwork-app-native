@@ -93,7 +93,7 @@ export const extractDecimalValues = (text: string): number[] => {
   for (const part of parts) {
     // Skip percentage values like "9%" or "9,00%:" but log them for debugging
     if (part.match(/^\d+([.,]\d+)?%/)) {
-      if (import.meta.env.VITE_APP_DEBUG_MODE === "true") {
+      if (process.env.EXPO_PUBLIC_APP_DEBUG_MODE === "true") {
         console.log(`[DEBUG] Skipping percentage value: ${part}`);
       }
       continue;
@@ -284,7 +284,7 @@ export const taxRules: ReceiptRule[] = [
       // If no high tax indicator found, don't apply this rule
       if (!highTaxIndicatorFound) {
         // Create a debug console message but only if debugging is enabled
-        if (import.meta.env.VITE_APP_DEBUG_MODE === "true") {
+        if (process.env.EXPO_PUBLIC_APP_DEBUG_MODE === "true") {
           console.log(
             `[High Tax] No high tax indicators found in receipt, skipping high tax detection`
           );

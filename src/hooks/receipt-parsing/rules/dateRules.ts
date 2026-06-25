@@ -77,7 +77,7 @@ export const dateRules: ReceiptRule[] = [
       createRegexMatchCondition(/\b\d{1,2}[-/.]\d{1,2}[-/.]\d{2,4}\b/),
     ],
     action: (elements, index, matchedConditions, formatInfo) => {
-      const areDebugging = import.meta.env.VITE_APP_DEBUG_MODE === "true";
+      const areDebugging = process.env.EXPO_PUBLIC_APP_DEBUG_MODE === "true";
 
       // Extract the parts of the date
       const text = elements[index].text;
@@ -148,7 +148,7 @@ export const dateRules: ReceiptRule[] = [
       ),
     ],
     action: (elements, index) => {
-      const areDebugging = import.meta.env.VITE_APP_DEBUG_MODE === "true";
+      const areDebugging = process.env.EXPO_PUBLIC_APP_DEBUG_MODE === "true";
 
       const parsedDate = parseDate(elements[index].text);
       if (parsedDate) {
@@ -261,7 +261,7 @@ export const dateRules: ReceiptRule[] = [
       createRegexMatchCondition(/\b\d{4}-[a-z]{3}-\d{1,2}\b/i),
     ],
     action: (elements, index) => {
-      const areDebugging = import.meta.env.VITE_APP_DEBUG_MODE === "true";
+      const areDebugging = process.env.EXPO_PUBLIC_APP_DEBUG_MODE === "true";
       const text = elements[index].text;
       
       // Try to extract the date parts
