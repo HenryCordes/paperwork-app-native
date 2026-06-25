@@ -11,7 +11,7 @@
 ## Global Constraints
 
 - **Faithful port for the pipeline; scoped-down UI.** Per design.md: no edit form, no save-to-API in this phase — `expenses.tsx` displays scan results read-only. Phase 4 extends this screen.
-- **The receipt-parsing engine is copied verbatim via `cp` from `paperwork-app`, not retyped.** Confirmed via `grep` that none of its 15 files import anything beyond their own siblings (no Capacitor, no React, no Ionic) — it is pure, portable logic. Retyping ~5,000 lines into this plan would add no value over citing the exact source path each step copies from.
+- **The receipt-parsing engine is copied verbatim via `cp` from `paperwork-app`, not retyped.** Confirmed via `grep` that none of its 15 files import anything beyond their own siblings (no Capacitor, no React, no Ionic) — it is pure, portable logic. Retyping ~5,000 lines into this plan would add no value over citing the exact source path each step copies from. **Two exceptions, found during implementation, not during planning:** (1) `preprocessing.ts` and `rules/totalRules.ts` both import `src/utils/numberUtils.ts` — one level outside the `receipt-parsing/` folder, missed because the original verification only grepped for Capacitor/Ionic/React patterns, not all out-of-folder relative imports. That file is also a verbatim, zero-dependency copy (confirmed byte-identical to source, no imports of its own) and is now part of Task 1's file list below. (2) 4 of the 15 files (`preprocessing.ts`, `rules/dateRules.ts`, `rules/totalRules.ts`, `rules/taxRules.ts`) gate debug-only `console.log` calls behind `import.meta.env.VITE_APP_DEBUG_MODE` (11 occurrences total) — a Vite-specific syntax Jest's transform doesn't support, so the ported tests fail at runtime, not on an assertion. Task 1 now includes one mechanical substitution after copying: `import.meta.env.VITE_APP_DEBUG_MODE` → `process.env.EXPO_PUBLIC_APP_DEBUG_MODE`, the same Vite→Expo env-var convention swap Phase 1 already established for `VITE_PAPERWORK_API_URL` → `EXPO_PUBLIC_API_URL`. Behavior is identical (an env-gated debug-logging flag); only the access syntax changes.
 - **`bridge.ts` and `useScanDocument.ts` are dead code — not ported.** `useScanDocument.ts` is a never-imported mock-data stub (confirmed: zero importers anywhere in `paperwork-app` besides itself); `bridge.ts` exists only to re-export for that dead hook. Porting either would be porting unreachable code.
 - **The 18 ported fixture/detector tests use Vitest's `describe`/`it`/`expect` imported from `"vitest"`.** This repo's Jest exposes the same three as ambient globals (matching every existing test here, e.g. `secureStorage.test.ts`) — the only required edit is deleting the `vitest` import line per file.
 - **Dutch user-facing text and Dutch number formatting, even where the source isn't.** `useScan.ts`'s OCR-failure messages are in English in the source (an inconsistency, not a deliberate behavior) and its scan-review modal uses bare `.toFixed(2)` (period decimal) rather than the Dutch comma-decimal format `AGENTS.md` mandates everywhere else. Both are corrected during the port, matching how Phase 1 chose `expo-secure-store` over replicating `localStorage`'s weaker security — a real improvement, not a faithful bug-for-bug copy, where this repo's own standard is stricter than the source.
@@ -28,7 +28,7 @@ paperwork-app-native/
   src/
     hooks/
       receipt-parsing/            # ported verbatim from paperwork-app (15 files)
-        preprocessing.ts
+        preprocessing.ts          # imports ../../utils/numberUtils.ts - see below
         utils.ts
         taxDetection.ts
         types.ts
@@ -51,6 +51,7 @@ paperwork-app-native/
         fileManagement.service.ts  # expo-file-system wrapper (Bonnen/ move+rename)
         useScan.ts                 # orchestrates the three services + receipt-parsing
     utils/
+      numberUtils.ts                # ported verbatim - dependency of preprocessing.ts and rules/totalRules.ts, missed in the original plan (out-of-folder import)
       currency.ts                  # formatCurrency() - Dutch comma-decimal formatting
     app/
       (drawer)/(tabs)/
@@ -87,6 +88,7 @@ paperwork-app-native/
 - Create: `src/hooks/receipt-parsing/{preprocessing.ts,utils.ts,taxDetection.ts,types.ts,index.ts,dateDetection.ts,totalDetection.ts}`
 - Create: `src/hooks/receipt-parsing/utils/spatialAnalysis.ts`
 - Create: `src/hooks/receipt-parsing/rules/{totalRules.ts,types.ts,dateRules.ts,ruleEngine.ts,conditionFactory.ts,index.ts,taxRules.ts}`
+- Create: `src/utils/numberUtils.ts` (dependency of `preprocessing.ts` and `rules/totalRules.ts`, one level outside `receipt-parsing/` — missed in the original file list, see Global Constraints)
 - Create: `src/__tests__/mockData/{burgerKingReceiptMockData.ts,roccaReceiptMockData.ts,superNatuurReceiptMockData.ts,mcdonaldsReceiptMockData.ts,praxisReceiptMockData.ts,expertReceiptMockData.ts,kruidvatReceiptMockData.ts,artisjokReceiptMockData.ts,kwalitariaReceiptMockData.ts,albertHeijnXLReceiptMockData.ts,primeraReceiptMockData.ts}`
 - Create: `src/__tests__/hooks/receipt-parsing/{mcdonaldsReceipt.test.ts,ruleEngine.test.ts,taxLineMatcher.test.ts,taxDetection.test.ts,expertReceipt.test.ts,dateDetection.test.ts,kwalitariaReceipt.test.ts,totalDetection.test.ts,artisjokReceipt.test.ts,praxisReceipt.test.ts,superNatuurReceipt.test.ts,brummensFriethuisReceipt.test.ts,primeraReceipt.test.ts,roccaReceipt.test.ts,kruitvatReceipt.test.ts,realWorldReceipt.test.ts,burgerKingReceipt.test.ts,albertHeijnXLReceipt.test.ts}`
 
@@ -112,6 +114,10 @@ cp ../paperwork-app/src/hooks/receipt-parsing/utils/spatialAnalysis.ts \
 for f in totalRules.ts types.ts dateRules.ts ruleEngine.ts conditionFactory.ts index.ts taxRules.ts; do
   cp ../paperwork-app/src/hooks/receipt-parsing/rules/"$f" src/hooks/receipt-parsing/rules/"$f"
 done
+
+# preprocessing.ts and rules/totalRules.ts both import this — one level
+# outside receipt-parsing/, easy to miss with a folder-scoped grep.
+cp ../paperwork-app/src/utils/numberUtils.ts src/utils/numberUtils.ts
 ```
 
 - [ ] **Step 2: Copy mock data verbatim**
@@ -148,6 +154,23 @@ for f in src/__tests__/hooks/receipt-parsing/*.test.ts; do
 done
 ```
 
+- [ ] **Step 3b: Swap the one Vite-specific debug flag for its Expo equivalent**
+
+4 files reference `import.meta.env.VITE_APP_DEBUG_MODE` to gate debug-only `console.log` calls — a Vite-only syntax Jest can't transform, so the ported tests fail at runtime (not on an assertion) until this is fixed. Same env-var-convention swap Phase 1 already made for the API URL:
+
+```bash
+for f in src/hooks/receipt-parsing/preprocessing.ts \
+         src/hooks/receipt-parsing/rules/dateRules.ts \
+         src/hooks/receipt-parsing/rules/totalRules.ts \
+         src/hooks/receipt-parsing/rules/taxRules.ts; do
+  sed -i '' 's/import\.meta\.env\.VITE_APP_DEBUG_MODE/process.env.EXPO_PUBLIC_APP_DEBUG_MODE/g' "$f"
+done
+
+grep -rn "import.meta" src/hooks/receipt-parsing/ || echo "clean: no import.meta references remain"
+```
+
+Expected: the `grep` finds nothing (or prints the "clean" echo).
+
 - [ ] **Step 4: Verify nothing was missed and every test passes unchanged**
 
 ```bash
@@ -161,7 +184,7 @@ Expected: the `grep` prints nothing (or the explicit "clean" echo if it exits no
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/hooks/receipt-parsing src/__tests__/hooks/receipt-parsing src/__tests__/mockData
+git add src/hooks/receipt-parsing src/utils/numberUtils.ts src/__tests__/hooks/receipt-parsing src/__tests__/mockData
 git commit -m "$(cat <<'EOF'
 feat: port receipt-parsing rule engine from paperwork-app
 
