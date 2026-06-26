@@ -1,4 +1,5 @@
 import { DashboardStatsRequest } from "./types/dashboard";
+import { ExpensesQueryParams } from "./types/expenses";
 
 const QueryKeys = {
   auth: {
@@ -15,6 +16,11 @@ const QueryKeys = {
   contacts: {
     base: ["contacts"] as const,
     list: () => [...QueryKeys.contacts.base, "list"] as const,
+  },
+  expenses: {
+    base: ["expenses"] as const,
+    list: (params: ExpensesQueryParams) => [...QueryKeys.expenses.base, "list", params] as const,
+    detail: (id: string) => [...QueryKeys.expenses.base, "detail", id] as const,
   },
 };
 
