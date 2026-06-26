@@ -10,6 +10,7 @@ import {
 
 import { pairBarData, type BarDataItem } from "./barPairing";
 import { ChartLegend } from "./ChartLegend";
+import { getNiceAxisScale } from "./chartScale";
 import { formatCurrency, formatCurrencyWhole } from "@/utils/currency";
 import { Colors, Spacing } from "@/constants/theme";
 import { ChartColors } from "@/constants/chartColors";
@@ -50,6 +51,9 @@ export function FinancialChart({
     turnoverColor: ChartColors.revenue[chartScheme],
     expensesColor: ChartColors.expenses[chartScheme],
   });
+  const { maxValue, stepValue, noOfSections } = getNiceAxisScale(
+    Math.max(...turnover, ...expenses, 0),
+  );
 
   return (
     <View>
@@ -69,11 +73,22 @@ export function FinancialChart({
             scheme === "dark" ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.1)"
           }
           barWidth={16}
+          maxValue={maxValue}
+          stepValue={stepValue}
+          noOfSections={noOfSections}
           rotateLabel
           labelsExtraHeight={24}
+          labelWidth={110}
           yAxisLabelWidth={72}
           yAxisTextStyle={{ color: colors.textSecondary, textAlign: "left" }}
-          xAxisLabelTextStyle={{ color: colors.textSecondary }}
+          xAxisLabelTextStyle={{
+            color: colors.textSecondary,
+            // The library hardcodes a +60deg clockwise rotation for
+            // positive-value bars with rotateLabel on, which mirrors the
+            // source's counterclockwise skew. Counter-rotating here nets
+            // -45deg, matching the source's direction.
+            transform: [{ rotate: "-105deg" }],
+          }}
           formatYLabel={(label: string) => `€${formatCurrencyWhole(Number(label))}`}
           renderTooltip={(item: BarDataItem) => (
             <View

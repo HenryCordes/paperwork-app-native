@@ -109,4 +109,49 @@ describe("FinancialChart styling", () => {
     const [props] = (BarChart as jest.Mock).mock.calls[0];
     expect(props.barWidth).toBe(16);
   });
+
+  // Bug, confirmed on a real device: the Y-axis divided the raw max bar
+  // value evenly into 10 sections (e.g. "€11.547"), instead of rounding to
+  // a human-friendly step like the source's "€2.000" increments.
+  it("rounds the Y-axis bounds to a nice human-readable scale based on the max bar value", () => {
+    (useColorScheme as jest.Mock).mockReturnValue("dark");
+
+    render(
+      <FinancialChart labels={["Jan"]} turnover={[12830]} expenses={[400]} />,
+    );
+
+    const [props] = (BarChart as jest.Mock).mock.calls[0];
+    expect(props.maxValue).toBe(14000);
+    expect(props.stepValue).toBe(2000);
+    expect(props.noOfSections).toBe(7);
+  });
+
+  // Bug, confirmed on a real device: with the default (bar-width-sized)
+  // label box, a full label like "February 2025" truncated to "f...". The
+  // box needs to be wide enough to hold the full text before rotation is
+  // applied - rotation then uses that extra width as diagonal space.
+  it("reserves enough label width to fit a full 'Month Year' label", () => {
+    (useColorScheme as jest.Mock).mockReturnValue("dark");
+
+    render(<FinancialChart labels={["Jan"]} turnover={[1000]} expenses={[400]} />);
+
+    const [props] = (BarChart as jest.Mock).mock.calls[0];
+    expect(props.labelWidth).toBeGreaterThanOrEqual(100);
+  });
+
+  // Bug, confirmed on a real device: the library's own rotateLabel rotates
+  // positive-value bars clockwise (+60deg internally), which is the mirror
+  // image of the source's counterclockwise skew. There's no prop to flip
+  // the direction, so this counter-rotates the label text itself (-105deg)
+  // to land on a net -45deg, matching the source visually.
+  it("counter-rotates the label text to land on the source's skew direction", () => {
+    (useColorScheme as jest.Mock).mockReturnValue("dark");
+
+    render(<FinancialChart labels={["Jan"]} turnover={[1000]} expenses={[400]} />);
+
+    const [props] = (BarChart as jest.Mock).mock.calls[0];
+    expect(props.xAxisLabelTextStyle).toEqual(
+      expect.objectContaining({ transform: [{ rotate: "-105deg" }] }),
+    );
+  });
 });

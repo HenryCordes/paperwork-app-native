@@ -26,14 +26,14 @@ describe("pairBarData", () => {
     expect(result[1].frontColor).toBe("#222222");
   });
 
-  // The dashboard API returns English month names regardless of the app's
-  // Dutch locale (e.g. "January 2025") - confirmed on a real device, as was
-  // the follow-up: translating to the full Dutch name made an already-tight
-  // x-axis label truncate even more aggressively, so this abbreviates.
-  it("abbreviates English month names in labels to a short Dutch form", () => {
+  // Confirmed against the source app's own screenshot: it shows the raw
+  // "February 2025" style label as-is, untranslated and unabbreviated - an
+  // earlier abbreviation pass here was based on a mistaken assumption and
+  // has been reverted.
+  it("passes labels through unchanged", () => {
     const result = pairBarData(["January 2025", "March 2025"], [1000, 1200], [400, 500]);
 
-    expect(result[0].label).toBe("jan 25");
-    expect(result[2].label).toBe("mrt 25");
+    expect(result[0].label).toBe("January 2025");
+    expect(result[2].label).toBe("March 2025");
   });
 });
