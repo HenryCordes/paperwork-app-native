@@ -7,7 +7,6 @@ import {
   View,
   useColorScheme,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
@@ -62,7 +61,6 @@ function periodLabel(periodType: PeriodType, periodPreset: PeriodPreset): string
 export default function Dashboard() {
   const scheme = useColorScheme();
   const colors = Colors[scheme === "dark" ? "dark" : "light"];
-  const insets = useSafeAreaInsets();
   const navigation = useNavigation();
 
   const [showPeriodSelector, setShowPeriodSelector] = useState(false);
@@ -110,7 +108,7 @@ export default function Dashboard() {
       testID="dashboard-screen"
       style={[
         styles.container,
-        { backgroundColor: colors.background, paddingTop: insets.top + Spacing.three },
+        { backgroundColor: colors.background },
       ]}
     >
       <ScrollView
@@ -147,7 +145,10 @@ export default function Dashboard() {
                 >
                   Omzet
                 </Text>
-                <Text numberOfLines={1} style={[styles.summaryValue, { color: colors.text }]}>
+                <Text
+                  numberOfLines={1}
+                  style={[styles.summaryValue, { color: colors.textSecondary }]}
+                >
                   €{formatCurrency(summary.totalRevenue)}
                 </Text>
               </Card>
@@ -158,7 +159,10 @@ export default function Dashboard() {
                 >
                   Uitgaven
                 </Text>
-                <Text numberOfLines={1} style={[styles.summaryValue, { color: colors.text }]}>
+                <Text
+                  numberOfLines={1}
+                  style={[styles.summaryValue, { color: colors.textSecondary }]}
+                >
                   €{formatCurrency(summary.totalExpenses)}
                 </Text>
               </Card>
@@ -172,7 +176,10 @@ export default function Dashboard() {
                 >
                   {summary.netProfit >= 0 ? "Winst" : "Verlies"}
                 </Text>
-                <Text numberOfLines={1} style={[styles.summaryValue, { color: colors.text }]}>
+                <Text
+                  numberOfLines={1}
+                  style={[styles.summaryValue, { color: colors.textSecondary }]}
+                >
                   €{formatCurrency(summary.netProfit)}
                 </Text>
               </Card>
@@ -209,6 +216,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: Spacing.three,
+    paddingTop: Spacing.three,
   },
   scrollContent: {
     gap: Spacing.three,

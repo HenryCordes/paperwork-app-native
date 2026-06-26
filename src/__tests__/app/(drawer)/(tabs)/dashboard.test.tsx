@@ -15,14 +15,6 @@ jest.mock("expo-router", () => ({
   useNavigation: jest.fn(),
 }));
 
-// Bug: on a real device the period-label header rendered flush against the
-// top edge, under the status bar/notch - no screen in this app reads safe-area
-// insets. Mock a non-zero top inset so the regression test below can assert
-// the screen actually accounts for it, the same way it would on a real device.
-jest.mock("react-native-safe-area-context", () => ({
-  useSafeAreaInsets: () => ({ top: 47, bottom: 0, left: 0, right: 0 }),
-}));
-
 function mockStats(
   overrides: Partial<Omit<ReturnType<typeof useDashboardStats>, "error">> & {
     error?: Error | null;
@@ -111,6 +103,10 @@ describe("Dashboard screen", () => {
 
     expect(getByText("Winst")).toBeTruthy();
     expect(getByText(/€600,00/)).toBeTruthy();
+    // Bug, confirmed on a real device: summary values rendered pure
+    // white/black (colors.text), too high-contrast against the dimmer
+    // uppercase labels above them - should use the same secondary tone.
+    expect(getByText(/€600,00/)).toHaveStyle({ color: "#636469" });
   });
 
   it("shows Verlies (loss, red) when netProfit is negative", () => {
@@ -206,12 +202,15 @@ describe("Dashboard screen", () => {
     expect(getAllByText("Overzicht Dit Jaar").length).toBeGreaterThanOrEqual(1);
   });
 
-  it("pads the top of the screen by the safe-area inset so the header isn't hidden behind the status bar", () => {
+  // Bug, confirmed on a real device: once the real navigation header was
+  // added (which already reserves its own safe-area-correct space above
+  // this screen), still adding insets.top here double-counted the inset,
+  // producing a large empty gap below the header.
+  it("uses only its own base padding at the top, not the safe-area inset on top of the real header", () => {
     mockStats({});
     const { getByTestId } = render(<Dashboard />);
 
-    // 47 (mocked inset) + 16 (Spacing.three, the screen's own base padding)
-    expect(getByTestId("dashboard-screen")).toHaveStyle({ paddingTop: 63 });
+    expect(getByTestId("dashboard-screen")).toHaveStyle({ paddingTop: 16 });
   });
 
   // Bug: the screen's content (header, summary cards, both charts and their
