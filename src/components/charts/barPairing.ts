@@ -1,3 +1,5 @@
+import { formatChartLabel } from "./chartLabelFormat";
+
 export interface BarDataItem {
   value: number;
   frontColor: string;
@@ -27,7 +29,7 @@ export function pairBarData(
       value: turnover[index],
       frontColor: turnoverColor,
       spacing: 2,
-      label,
+      label: formatChartLabel(label),
     },
     {
       value: expenses[index],

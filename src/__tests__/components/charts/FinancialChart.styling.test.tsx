@@ -60,33 +60,6 @@ describe("FinancialChart styling", () => {
     );
   });
 
-  // Bug, confirmed on a real device: the skewed x-axis date labels were
-  // invisible - the legend below the chart appeared right where the labels
-  // should have been. rotateLabel needs extra reserved height for the
-  // diagonal text, which the chart's overflow:"hidden" container was
-  // otherwise clipping.
-  it("reserves extra height for the rotated x-axis labels so they aren't clipped", () => {
-    (useColorScheme as jest.Mock).mockReturnValue("dark");
-
-    render(<FinancialChart labels={["Jan"]} turnover={[1000]} expenses={[400]} />);
-
-    const [props] = (BarChart as jest.Mock).mock.calls[0];
-    expect(props.labelsExtraHeight).toBe(24);
-  });
-
-  // The source's x-axis labels render at a skewed angle, which gives each
-  // one much more effective length to read without truncating - confirmed
-  // against the source screenshot. Abbreviating the label text (a separate,
-  // already-applied fix) helps, but doesn't replace this.
-  it("rotates the x-axis labels, matching the source's skewed look", () => {
-    (useColorScheme as jest.Mock).mockReturnValue("dark");
-
-    render(<FinancialChart labels={["Jan"]} turnover={[1000]} expenses={[400]} />);
-
-    const [props] = (BarChart as jest.Mock).mock.calls[0];
-    expect(props.rotateLabel).toBe(true);
-  });
-
   it("uses the light-mode equivalents when the device is in light mode", () => {
     (useColorScheme as jest.Mock).mockReturnValue("light");
 
@@ -126,32 +99,34 @@ describe("FinancialChart styling", () => {
     expect(props.noOfSections).toBe(7);
   });
 
-  // Bug, confirmed on a real device: with the default (bar-width-sized)
-  // label box, a full label like "February 2025" truncated to "f...". The
-  // box needs to be wide enough to hold the full text before rotation is
-  // applied - rotation then uses that extra width as diagonal space.
-  it("reserves enough label width to fit a full 'Month Year' label", () => {
+  // Bug, confirmed on a real device: the default label box (barWidth +
+  // spacing, ~18px) truncated even a short label like "Jan" to "J..". There
+  // is no axis rotation here (the labels must scroll in sync with the bars,
+  // which only the chart's own native rendering does), so the box has to be
+  // wide enough on its own to fit the widest label this chart shows - the
+  // "25-02" daily format.
+  it("widens the label box to fit the widest label without rotating it", () => {
     (useColorScheme as jest.Mock).mockReturnValue("dark");
 
     render(<FinancialChart labels={["Jan"]} turnover={[1000]} expenses={[400]} />);
 
     const [props] = (BarChart as jest.Mock).mock.calls[0];
-    expect(props.labelWidth).toBeGreaterThanOrEqual(100);
+    expect(props.labelWidth).toBe(48);
+    expect(props.rotateLabel).toBeUndefined();
   });
 
-  // Bug, confirmed on a real device: the library's own rotateLabel rotates
-  // positive-value bars clockwise (+60deg internally), which is the mirror
-  // image of the source's counterclockwise skew. There's no prop to flip
-  // the direction, so this counter-rotates the label text itself (-105deg)
-  // to land on a net -45deg, matching the source visually.
-  it("counter-rotates the label text to land on the source's skew direction", () => {
+  // Bug, confirmed on a real device: widening the label box (above) shifts
+  // its center right of the bar by (labelWidth-barWidth)/2 = 16px, since the
+  // box's left/width math centers it at labelWidth/2 from the bar's own left
+  // edge, not barWidth/2. This counter-shifts the text back to recenter it.
+  it("recenters the label text under the bar after widening its box", () => {
     (useColorScheme as jest.Mock).mockReturnValue("dark");
 
     render(<FinancialChart labels={["Jan"]} turnover={[1000]} expenses={[400]} />);
 
     const [props] = (BarChart as jest.Mock).mock.calls[0];
     expect(props.xAxisLabelTextStyle).toEqual(
-      expect.objectContaining({ transform: [{ rotate: "-105deg" }] }),
+      expect.objectContaining({ transform: [{ translateX: -16 }] }),
     );
   });
 });

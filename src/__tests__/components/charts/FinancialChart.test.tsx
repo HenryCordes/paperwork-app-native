@@ -82,4 +82,21 @@ describe("FinancialChart", () => {
       getByText("Geen gegevens beschikbaar voor deze periode"),
     ).toHaveStyle({ color: "#636469" });
   });
+
+  // End-to-end check that the chart abbreviates whatever period-type label
+  // the API sends, rather than showing the raw, too-long string.
+  it("abbreviates x-axis labels for each period type the API can send", () => {
+    const { getByText } = render(
+      <FinancialChart
+        labels={["February 2025", "Q1 2025", "2025-02-25", "2025"]}
+        turnover={[1000, 1200, 900, 5000]}
+        expenses={[400, 500, 300, 1000]}
+      />,
+    );
+
+    expect(getByText("Feb")).toBeTruthy();
+    expect(getByText("Q1")).toBeTruthy();
+    expect(getByText("25-02")).toBeTruthy();
+    expect(getByText("2025")).toBeTruthy();
+  });
 });

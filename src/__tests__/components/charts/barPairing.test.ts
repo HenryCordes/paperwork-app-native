@@ -26,14 +26,13 @@ describe("pairBarData", () => {
     expect(result[1].frontColor).toBe("#222222");
   });
 
-  // Confirmed against the source app's own screenshot: it shows the raw
-  // "February 2025" style label as-is, untranslated and unabbreviated - an
-  // earlier abbreviation pass here was based on a mistaken assumption and
-  // has been reverted.
-  it("passes labels through unchanged", () => {
+  // The x-axis has no rotation (it must scroll in sync with the bars, which
+  // only the chart library's own native label rendering does), so each
+  // label is run through formatChartLabel to fit a narrow bar slot.
+  it("formats each label via formatChartLabel", () => {
     const result = pairBarData(["January 2025", "March 2025"], [1000, 1200], [400, 500]);
 
-    expect(result[0].label).toBe("January 2025");
-    expect(result[2].label).toBe("March 2025");
+    expect(result[0].label).toBe("Jan");
+    expect(result[2].label).toBe("Mrt");
   });
 });

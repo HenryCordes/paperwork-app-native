@@ -76,18 +76,20 @@ export function FinancialChart({
           maxValue={maxValue}
           stepValue={stepValue}
           noOfSections={noOfSections}
-          rotateLabel
-          labelsExtraHeight={24}
-          labelWidth={110}
+          // Default label box is barWidth+spacing (~18px) - too narrow even
+          // for the widest label this chart shows ("25-02", the daily
+          // format). Widened to fit that comfortably.
+          labelWidth={48}
           yAxisLabelWidth={72}
           yAxisTextStyle={{ color: colors.textSecondary, textAlign: "left" }}
           xAxisLabelTextStyle={{
             color: colors.textSecondary,
-            // The library hardcodes a +60deg clockwise rotation for
-            // positive-value bars with rotateLabel on, which mirrors the
-            // source's counterclockwise skew. Counter-rotating here nets
-            // -45deg, matching the source's direction.
-            transform: [{ rotate: "-105deg" }],
+            // The label box's left/width math centers it at labelWidth/2
+            // from the bar's own left edge, not barWidth/2 - so widening the
+            // box (above) shifts its visual center right of the bar by
+            // (labelWidth-barWidth)/2 = (48-16)/2 = 16px. Shifting the text
+            // back by that amount recenters it under the bar.
+            transform: [{ translateX: -16 }],
           }}
           formatYLabel={(label: string) => `€${formatCurrencyWhole(Number(label))}`}
           renderTooltip={(item: BarDataItem) => (
