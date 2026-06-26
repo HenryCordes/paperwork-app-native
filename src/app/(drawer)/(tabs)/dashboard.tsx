@@ -8,6 +8,7 @@ import {
   useColorScheme,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
 import { useDashboardStats } from "@/hooks/useDashboard";
 import { FinancialChart } from "@/components/charts/FinancialChart";
@@ -100,7 +101,12 @@ export default function Dashboard() {
             accessibilityLabel="Periode wijzigen"
             onPress={() => setShowPeriodSelector((current) => !current)}
           >
-            <Text style={{ color: colors.primary }}>Periode</Text>
+            <Ionicons
+              testID="period-filter-icon"
+              name="funnel"
+              size={22}
+              color={colors.primary}
+            />
           </Pressable>
         </View>
 

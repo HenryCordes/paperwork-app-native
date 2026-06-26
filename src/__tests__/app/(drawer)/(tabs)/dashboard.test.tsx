@@ -160,6 +160,12 @@ describe("Dashboard screen", () => {
     expect(getByText("Omzet vs Uitgaven")).toBeTruthy();
   });
 
+  it("shows a funnel icon for the period toggle, matching the source's header button", () => {
+    mockStats({});
+    const { getByTestId } = render(<Dashboard />);
+    expect(getByTestId("period-filter-icon")).toBeTruthy();
+  });
+
   it("pads the top of the screen by the safe-area inset so the header isn't hidden behind the status bar", () => {
     mockStats({});
     const { getByTestId } = render(<Dashboard />);
