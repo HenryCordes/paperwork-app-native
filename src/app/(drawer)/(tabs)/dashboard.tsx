@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useLayoutEffect, useState } from "react";
 import {
   Pressable,
   ScrollView,
@@ -8,6 +8,7 @@ import {
   useColorScheme,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useNavigation } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
 import { useDashboardStats } from "@/hooks/useDashboard";
@@ -62,6 +63,7 @@ export default function Dashboard() {
   const scheme = useColorScheme();
   const colors = Colors[scheme === "dark" ? "dark" : "light"];
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation();
 
   const [showPeriodSelector, setShowPeriodSelector] = useState(false);
   const [periodType, setPeriodType] = useState<PeriodType>(PERIOD_TYPES.MONTHLY);
@@ -81,6 +83,28 @@ export default function Dashboard() {
 
   const summary = summarize(data?.data.rawData);
 
+  // The funnel button lives in the real navigation header (hamburger |
+  // title | funnel, matching the source), not in the screen's own content -
+  // it has to be injected this way since the header itself is owned by the
+  // (tabs) layout, not this screen, but the toggle needs this screen's state.
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <Pressable
+          accessibilityLabel="Periode wijzigen"
+          onPress={() => setShowPeriodSelector((current) => !current)}
+        >
+          <Ionicons
+            testID="period-filter-icon"
+            name="funnel"
+            size={22}
+            color={colors.primary}
+          />
+        </Pressable>
+      ),
+    });
+  }, [navigation, colors.primary]);
+
   return (
     <View
       testID="dashboard-screen"
@@ -93,22 +117,9 @@ export default function Dashboard() {
         testID="dashboard-scroll"
         contentContainerStyle={styles.scrollContent}
       >
-        <View style={styles.header}>
-          <Text style={[styles.title, { color: colors.text }]}>
-            {periodLabel(periodType, periodPreset)}
-          </Text>
-          <Pressable
-            accessibilityLabel="Periode wijzigen"
-            onPress={() => setShowPeriodSelector((current) => !current)}
-          >
-            <Ionicons
-              testID="period-filter-icon"
-              name="funnel"
-              size={22}
-              color={colors.primary}
-            />
-          </Pressable>
-        </View>
+        <Text style={[styles.title, { color: colors.text }]}>
+          {periodLabel(periodType, periodPreset)}
+        </Text>
 
         {showPeriodSelector ? (
           <PeriodSelector
@@ -130,23 +141,30 @@ export default function Dashboard() {
           <>
             <View style={styles.summaryRow}>
               <Card style={styles.summaryCard}>
-                <Text style={[styles.summaryLabel, { color: colors.primary }]}>
+                <Text
+                  numberOfLines={1}
+                  style={[styles.summaryLabel, { color: colors.primary }]}
+                >
                   Omzet
                 </Text>
-                <Text style={{ color: colors.text }}>
+                <Text numberOfLines={1} style={[styles.summaryValue, { color: colors.text }]}>
                   €{formatCurrency(summary.totalRevenue)}
                 </Text>
               </Card>
               <Card style={styles.summaryCard}>
-                <Text style={[styles.summaryLabel, { color: colors.danger }]}>
+                <Text
+                  numberOfLines={1}
+                  style={[styles.summaryLabel, { color: colors.danger }]}
+                >
                   Uitgaven
                 </Text>
-                <Text style={{ color: colors.text }}>
+                <Text numberOfLines={1} style={[styles.summaryValue, { color: colors.text }]}>
                   €{formatCurrency(summary.totalExpenses)}
                 </Text>
               </Card>
               <Card style={styles.summaryCard}>
                 <Text
+                  numberOfLines={1}
                   style={[
                     styles.summaryLabel,
                     { color: summary.netProfit >= 0 ? colors.success : colors.danger },
@@ -154,7 +172,7 @@ export default function Dashboard() {
                 >
                   {summary.netProfit >= 0 ? "Winst" : "Verlies"}
                 </Text>
-                <Text style={{ color: colors.text }}>
+                <Text numberOfLines={1} style={[styles.summaryValue, { color: colors.text }]}>
                   €{formatCurrency(summary.netProfit)}
                 </Text>
               </Card>
@@ -196,14 +214,10 @@ const styles = StyleSheet.create({
     gap: Spacing.three,
     paddingBottom: Spacing.three,
   },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
   title: {
     fontSize: 16,
     fontWeight: "600",
+    textAlign: "center",
   },
   summaryRow: {
     flexDirection: "row",
@@ -214,10 +228,15 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     gap: Spacing.one,
+    paddingHorizontal: Spacing.one,
+  },
+  summaryValue: {
+    fontSize: 13,
+    fontWeight: "600",
   },
   summaryLabel: {
     textTransform: "uppercase",
-    fontSize: 13,
+    fontSize: 11,
     fontWeight: "600",
   },
   cardTitle: {

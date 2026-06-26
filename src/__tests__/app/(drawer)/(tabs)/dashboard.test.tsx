@@ -1,9 +1,19 @@
 import { render, fireEvent } from "@testing-library/react-native";
+import { useNavigation } from "expo-router";
 
 import Dashboard from "@/app/(drawer)/(tabs)/dashboard";
 import { useDashboardStats } from "@/hooks/useDashboard";
 
 jest.mock("@/hooks/useDashboard");
+
+// The funnel button now lives in the real navigation header (set via
+// navigation.setOptions), not in the screen's own content - matching the
+// source, where the hamburger/title/funnel row is the native nav bar, and
+// "Overzicht ..." is a separate centered line below it.
+const mockSetOptions = jest.fn();
+jest.mock("expo-router", () => ({
+  useNavigation: jest.fn(),
+}));
 
 // Bug: on a real device the period-label header rendered flush against the
 // top edge, under the status bar/notch - no screen in this app reads safe-area
@@ -29,6 +39,10 @@ function mockStats(
 }
 
 describe("Dashboard screen", () => {
+  beforeEach(() => {
+    (useNavigation as jest.Mock).mockReturnValue({ setOptions: mockSetOptions });
+  });
+
   // react-native-gifted-charts's BarChart (rendered for real by FinancialChart
   // below) schedules a real setTimeout (default 800ms) to fade in axis labels.
   // Without fake timers that callback fires after Jest has torn the test
@@ -133,12 +147,16 @@ describe("Dashboard screen", () => {
     expect(getByText("Verlies")).toBeTruthy();
   });
 
-  it("toggles the period selector visibility on funnel button press", () => {
+  it("toggles the period selector visibility when the header's funnel button is pressed", () => {
     mockStats({});
-    const { getByLabelText, queryByText } = render(<Dashboard />);
+    const { queryByText } = render(<Dashboard />);
 
     expect(queryByText("Per")).toBeNull();
+
+    const headerRight = mockSetOptions.mock.calls.at(-1)?.[0].headerRight;
+    const { getByLabelText } = render(headerRight());
     fireEvent.press(getByLabelText("Periode wijzigen"));
+
     expect(queryByText("Per")).toBeTruthy();
   });
 
@@ -160,10 +178,32 @@ describe("Dashboard screen", () => {
     expect(getByText("Omzet vs Uitgaven")).toBeTruthy();
   });
 
-  it("shows a funnel icon for the period toggle, matching the source's header button", () => {
+  // Bug, confirmed on a real device: uppercase "UITGAVEN" wrapped onto two
+  // lines inside its (narrow, one-of-three) card.
+  it("keeps each summary stat label on a single line", () => {
     mockStats({});
-    const { getByTestId } = render(<Dashboard />);
+    const { getByText } = render(<Dashboard />);
+
+    expect(getByText("Omzet").props.numberOfLines).toBe(1);
+    expect(getByText("Uitgaven").props.numberOfLines).toBe(1);
+  });
+
+  it("sets the header's right-side button to a funnel icon, matching the source", () => {
+    mockStats({});
+    render(<Dashboard />);
+
+    const headerRight = mockSetOptions.mock.calls.at(-1)?.[0].headerRight;
+    const { getByTestId } = render(headerRight());
     expect(getByTestId("period-filter-icon")).toBeTruthy();
+  });
+
+  it("shows the period label as its own centered line, separate from the header", () => {
+    mockStats({});
+    const { getAllByText } = render(<Dashboard />);
+    // Appears twice: once as this standalone line, once as the bar-chart
+    // card's own title - both already covered by an earlier test; this one
+    // only needs to confirm the standalone line itself renders.
+    expect(getAllByText("Overzicht Dit Jaar").length).toBeGreaterThanOrEqual(1);
   });
 
   it("pads the top of the screen by the safe-area inset so the header isn't hidden behind the status bar", () => {
