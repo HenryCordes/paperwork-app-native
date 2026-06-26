@@ -24,4 +24,34 @@ describe("Card", () => {
 
     expect(getByTestId("card")).toHaveStyle({ borderRadius: 12, marginTop: 20 });
   });
+
+  it("has no border by default, matching Dashboard's existing cards", () => {
+    const { getByTestId } = render(
+      <Card testID="card">
+        <Text>content</Text>
+      </Card>,
+    );
+
+    expect(getByTestId("card")).not.toHaveStyle({ borderWidth: 10 });
+  });
+
+  it("renders a visible border and tighter padding when bordered, for list/detail item cards", () => {
+    const { getByTestId } = render(
+      <Card testID="card" bordered>
+        <Text>content</Text>
+      </Card>,
+    );
+
+    expect(getByTestId("card")).toHaveStyle({ borderWidth: 10, padding: 8 });
+  });
+
+  it("still lets a caller-supplied style override the bordered defaults", () => {
+    const { getByTestId } = render(
+      <Card testID="card" bordered style={{ padding: 0 }}>
+        <Text>content</Text>
+      </Card>,
+    );
+
+    expect(getByTestId("card")).toHaveStyle({ borderWidth: 10, padding: 0 });
+  });
 });

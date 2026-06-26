@@ -11,6 +11,7 @@ const light = {
   text: "#000000",
   backgroundElement: "#f4f5f8",
   textSecondary: "#636469",
+  border: "#d1d1d6",
 } as const;
 
 const dark = {
@@ -26,6 +27,7 @@ const dark = {
   text: "#ffffff",
   backgroundElement: Platform.select({ ios: "#1c1c1d", default: "#1e1e1e" }),
   textSecondary: "#989aa2",
+  border: "#38383a",
 } as const;
 
 export const Colors = { light, dark };

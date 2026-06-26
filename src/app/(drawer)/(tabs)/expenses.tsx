@@ -1,74 +1,188 @@
-import { useState } from "react";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "expo-router";
+import { useEffect, useRef, useState } from "react";
 import {
-  Image,
+  FlatList,
   Pressable,
   StyleSheet,
   Text,
+  TextInput,
   View,
   useColorScheme,
 } from "react-native";
 
-import { useScan } from "@/hooks/scan/useScan";
-import { ScanResult } from "@/hooks/scan/scan.types";
-import { formatCurrency } from "@/utils/currency";
+import QueryKeys from "@/api/queryKeys";
+import expensesService from "@/api/services/expensesService";
+import { Expense } from "@/api/types/expenses";
+import { Card } from "@/components/Card";
 import { Colors, Spacing } from "@/constants/theme";
+import { useExpensesList } from "@/hooks/useExpenses";
+import { formatCurrency } from "@/utils/currency";
+
+const LIMIT = 10;
+
+function filterExpenses(expenses: Expense[], search: string): Expense[] {
+  if (search.trim() === "") {
+    return expenses;
+  }
+
+  const lowercaseSearch = search.toLowerCase();
+  return expenses.filter(
+    (expense) =>
+      expense.info?.toLowerCase().includes(lowercaseSearch) ||
+      expense.contactName?.toLowerCase().includes(lowercaseSearch) ||
+      expense.expenseNumber?.toString().includes(lowercaseSearch) ||
+      expense.price?.toString().includes(lowercaseSearch),
+  );
+}
 
 export default function Expenses() {
   const scheme = useColorScheme();
   const colors = Colors[scheme === "dark" ? "dark" : "light"];
-  const { scan, isScanning, scanError } = useScan();
-  const [result, setResult] = useState<ScanResult | null>(null);
+  const router = useRouter();
+  const queryClient = useQueryClient();
 
-  const handleScan = async () => {
-    const scanResult = await scan();
-    setResult(scanResult);
+  const [searchText, setSearchText] = useState("");
+  const [allExpenses, setAllExpenses] = useState<Expense[]>([]);
+  const [page, setPage] = useState(0);
+  const [hasNextPage, setHasNextPage] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const isLoadingMoreRef = useRef(false);
+
+  const { data, isLoading, isError, error } = useExpensesList({
+    offset: 0,
+    limit: LIMIT,
+  });
+
+  useEffect(() => {
+    if (data?.data.docs) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing locally-accumulated pagination state (allExpenses/hasNextPage/page) from the query result; loadMore appends pages the query cache itself doesn't track, so this can't be computed inline.
+      setAllExpenses(data.data.docs);
+      setHasNextPage(data.data.hasNextPage);
+      setPage(0);
+    }
+  }, [data]);
+
+  const filteredExpenses = filterExpenses(allExpenses, searchText);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await queryClient.invalidateQueries({ queryKey: QueryKeys.expenses.base });
+    setIsRefreshing(false);
   };
 
-  return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Pressable
-        style={[styles.button, { backgroundColor: colors.primary }]}
-        onPress={handleScan}
-        disabled={isScanning}
-      >
-        <Text style={styles.buttonText}>
-          {isScanning ? "Bon scannen..." : "Bon scannen"}
-        </Text>
-      </Pressable>
+  const loadMore = async () => {
+    if (!hasNextPage || isLoadingMoreRef.current) {
+      return;
+    }
 
-      {scanError ? (
-        <Text style={[styles.message, { color: colors.text }]}>
-          {scanError}
-        </Text>
-      ) : null}
+    isLoadingMoreRef.current = true;
+    try {
+      const nextPage = page + 1;
+      const offset = nextPage * LIMIT;
+      const response = await expensesService.getExpenses({
+        offset,
+        limit: LIMIT,
+      });
 
-      {result ? (
-        <View style={styles.resultCard}>
-          <Image source={{ uri: result.imageUri }} style={styles.preview} />
-          <Text style={{ color: colors.text }}>
-            Datum: {result.receiptInfo.date.toLocaleDateString("nl-NL")}
-          </Text>
-          <Text style={{ color: colors.text }}>
-            Totaalbedrag: €{formatCurrency(result.receiptInfo.total)}
-          </Text>
-          {result.receiptInfo.taxLow > 0 ? (
-            <Text style={{ color: colors.text }}>
-              BTW Laag (9%): €{formatCurrency(result.receiptInfo.taxLow)}
-            </Text>
-          ) : null}
-          {result.receiptInfo.taxHigh > 0 ? (
-            <Text style={{ color: colors.text }}>
-              BTW Hoog (21%): €{formatCurrency(result.receiptInfo.taxHigh)}
-            </Text>
-          ) : null}
+      setHasNextPage(response.data.hasNextPage);
+      if (response.data.docs.length > 0) {
+        setAllExpenses((current) => [...current, ...response.data.docs]);
+        setPage(nextPage);
+      }
+    } finally {
+      isLoadingMoreRef.current = false;
+    }
+  };
+
+  const renderExpense = ({ item }: { item: Expense }) => (
+    <Pressable onPress={() => router.push(`/expenses/${item._id}`)}>
+      <Card testID="expense-card" bordered style={styles.card}>
+        <Text style={[styles.title, { color: colors.text }]}>
+          #{item.expenseNumber} - {item.info}
+        </Text>
+        <View style={styles.row}>
+          <Text style={{ color: colors.textSecondary }}>Contact</Text>
+          <Text style={{ color: colors.text }}>{item.contactName || "-"}</Text>
         </View>
-      ) : null}
+        <View style={styles.row}>
+          <Text style={{ color: colors.textSecondary }}>Datum</Text>
+          <Text style={{ color: colors.text }}>
+            {new Date(item.expenseDate).toLocaleDateString("nl-NL")}
+          </Text>
+        </View>
+        <View style={styles.row}>
+          <Text style={{ color: colors.textSecondary }}>Bedrag</Text>
+          <Text style={{ color: colors.text }}>
+            €{formatCurrency(item.price || 0)}
+          </Text>
+        </View>
+        <View style={styles.row}>
+          <Text style={{ color: colors.textSecondary }}>BTW 21%</Text>
+          <Text style={{ color: colors.text }}>
+            €{formatCurrency(item.tax || 0)}
+          </Text>
+        </View>
+        <View style={styles.row}>
+          <Text style={{ color: colors.textSecondary }}>BTW 9%</Text>
+          <Text style={{ color: colors.text }}>
+            €{formatCurrency(item.taxLow || 0)}
+          </Text>
+        </View>
+      </Card>
+    </Pressable>
+  );
 
-      {!result && !scanError && !isScanning ? (
-        <Text style={[styles.message, { color: colors.textSecondary }]}>
-          Scan een bon om de gegevens automatisch te herkennen.
+  return (
+    <View
+      testID="expenses-screen"
+      style={[styles.container, { backgroundColor: colors.background }]}
+    >
+      <TextInput
+        testID="expenses-search"
+        style={[
+          styles.search,
+          { backgroundColor: colors.backgroundElement, color: colors.text },
+        ]}
+        placeholder="Zoek kosten..."
+        placeholderTextColor={colors.textSecondary}
+        value={searchText}
+        onChangeText={setSearchText}
+      />
+
+      {isError ? (
+        <Text style={[styles.message, { color: colors.danger }]}>
+          Fout bij laden van kosten: {error?.message || "Onbekende fout"}
         </Text>
-      ) : null}
+      ) : isLoading ? null : filteredExpenses.length === 0 ? (
+        <Text style={[styles.message, { color: colors.textSecondary }]}>
+          Geen kosten gevonden
+        </Text>
+      ) : (
+        <FlatList
+          testID="expenses-list"
+          data={filteredExpenses}
+          keyExtractor={(item) => item._id}
+          renderItem={renderExpense}
+          contentContainerStyle={styles.listContent}
+          onEndReached={loadMore}
+          onEndReachedThreshold={0.3}
+          refreshing={isRefreshing}
+          onRefresh={handleRefresh}
+        />
+      )}
+
+      <Pressable
+        testID="expenses-fab"
+        accessibilityLabel="Nieuwe kosten toevoegen"
+        style={styles.fabPosition}
+        onPress={() => router.push("/expenses/edit/create")}
+      >
+        <Card style={[styles.fab, { backgroundColor: colors.primary }]}>
+          <Ionicons name="add" size={28} color="#ffffff" />
+        </Card>
+      </Pressable>
     </View>
   );
 }
@@ -76,31 +190,44 @@ export default function Expenses() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    padding: Spacing.three,
     gap: Spacing.three,
-    padding: Spacing.four,
   },
-  button: {
+  search: {
     borderRadius: 8,
-    paddingVertical: Spacing.three,
-    paddingHorizontal: Spacing.four,
-  },
-  buttonText: {
-    color: "#ffffff",
-    fontWeight: "600",
+    paddingVertical: Spacing.two,
+    paddingHorizontal: Spacing.three,
   },
   message: {
     textAlign: "center",
+    marginTop: Spacing.four,
   },
-  resultCard: {
-    width: "100%",
+  listContent: {
     gap: Spacing.two,
-    alignItems: "center",
+    paddingBottom: Spacing.six,
   },
-  preview: {
-    width: 200,
-    height: 260,
-    borderRadius: 8,
+  card: {
+    gap: Spacing.half,
+  },
+  title: {
+    fontWeight: "600",
+    marginBottom: Spacing.one,
+  },
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  fabPosition: {
+    position: "absolute",
+    right: Spacing.four,
+    bottom: Spacing.four,
+  },
+  fab: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    padding: 0,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

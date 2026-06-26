@@ -1,98 +1,222 @@
-import { render, fireEvent } from "@testing-library/react-native";
+import { fireEvent, render, waitFor } from "@testing-library/react-native";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useRouter } from "expo-router";
 
 import Expenses from "@/app/(drawer)/(tabs)/expenses";
-import { useScan } from "@/hooks/scan/useScan";
+import { useExpensesList } from "@/hooks/useExpenses";
+import expensesService from "@/api/services/expensesService";
+import QueryKeys from "@/api/queryKeys";
+import type { Expense, ExpensesResponse } from "@/api/types/expenses";
 
-// Same fix Task 5 needed: automocking useScan still loads the real module
-// once to infer its shape, which transitively imports
-// react-native-document-scanner-plugin - that plugin throws via
-// TurboModuleRegistry.getEnforcing() outside a native runtime unless it's
-// mocked first.
-jest.mock("react-native-document-scanner-plugin", () => ({
+jest.mock("expo-router", () => ({ useRouter: jest.fn() }));
+jest.mock("@/hooks/useExpenses");
+jest.mock("@/api/services/expensesService", () => ({
   __esModule: true,
-  default: { scanDocument: jest.fn() },
+  default: { getExpenses: jest.fn() },
 }));
-jest.mock("@/hooks/scan/useScan");
 
-describe("Expenses (Kosten) screen", () => {
+const mockPush = jest.fn();
+
+function renderScreen() {
+  const client = new QueryClient();
+  const result = render(
+    <QueryClientProvider client={client}>
+      <Expenses />
+    </QueryClientProvider>,
+  );
+  return { ...result, client };
+}
+
+function makeExpense(overrides: Partial<Expense> = {}): Expense {
+  return {
+    _id: "e1",
+    state: "active",
+    contactId: "c1",
+    contactName: "Acme",
+    expenseNumber: 1,
+    expenseDate: "2026-01-15",
+    info: "Lunch",
+    tax: 21,
+    taxLow: 9,
+    price: 100,
+    createdAt: "2026-01-15",
+    tenantId: "t1",
+    priceWOTaxes: 0,
+    ...overrides,
+  };
+}
+
+function makeListResponse(
+  docs: Expense[],
+  overrides: Partial<ExpensesResponse["data"]> = {},
+): ExpensesResponse {
+  return {
+    success: true,
+    data: {
+      docs,
+      totalDocs: docs.length,
+      offset: 0,
+      limit: 10,
+      totalPages: 1,
+      page: 1,
+      pagingCounter: 1,
+      hasPrevPage: false,
+      hasNextPage: false,
+      prevPage: null,
+      nextPage: null,
+      ...overrides,
+    },
+  };
+}
+
+function mockExpensesList(overrides: Partial<ReturnType<typeof useExpensesList>>) {
+  (useExpensesList as jest.Mock).mockReturnValue({
+    data: undefined,
+    isLoading: false,
+    isError: false,
+    error: null,
+    ...overrides,
+  });
+}
+
+describe("Expenses (Kosten) List screen", () => {
+  beforeEach(() => {
+    (useRouter as jest.Mock).mockReturnValue({ push: mockPush });
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it("shows the extracted fields after a successful scan", async () => {
-    const scan = jest.fn().mockResolvedValue({
-      imageUri: "file:///Bonnen/bon.jpg",
-      receiptInfo: {
-        date: new Date("2026-06-25"),
-        total: 12.5,
-        taxLow: 0,
-        taxHigh: 2.18,
-      },
-    });
-    (useScan as jest.Mock).mockReturnValue({
-      scan,
-      isScanning: false,
-      scanError: null,
-    });
+  it("renders a card per expense with its key fields", () => {
+    mockExpensesList({ data: makeListResponse([makeExpense()]) });
 
-    const { findByText, getByText } = render(<Expenses />);
-    fireEvent.press(getByText("Bon scannen"));
+    const { getByText } = renderScreen();
 
-    expect(await findByText(/Totaalbedrag: €12,50/)).toBeTruthy();
-    expect(await findByText(/BTW Hoog \(21%\): €2,18/)).toBeTruthy();
+    expect(getByText("#1 - Lunch")).toBeTruthy();
+    expect(getByText("Acme")).toBeTruthy();
+    expect(getByText(new Date("2026-01-15").toLocaleDateString("nl-NL"))).toBeTruthy();
+    expect(getByText("€100,00")).toBeTruthy();
+    expect(getByText("€21,00")).toBeTruthy();
+    expect(getByText("€9,00")).toBeTruthy();
   });
 
-  it("hides a tax field when it's zero", async () => {
-    const scan = jest.fn().mockResolvedValue({
-      imageUri: "file:///Bonnen/bon.jpg",
-      receiptInfo: {
-        date: new Date("2026-06-25"),
-        total: 12.5,
-        taxLow: 0,
-        taxHigh: 2.18,
-      },
-    });
-    (useScan as jest.Mock).mockReturnValue({
-      scan,
-      isScanning: false,
-      scanError: null,
-    });
+  it("renders each card with a visible border", () => {
+    mockExpensesList({ data: makeListResponse([makeExpense()]) });
 
-    const { findByText, queryByText, getByText } = render(<Expenses />);
-    fireEvent.press(getByText("Bon scannen"));
+    const { getByTestId } = renderScreen();
 
-    await findByText(/Totaalbedrag/);
-    expect(queryByText(/BTW Laag/)).toBeNull();
+    expect(getByTestId("expense-card")).toHaveStyle({ borderWidth: 10 });
   });
 
-  it("shows the Dutch error message when scanning fails", async () => {
-    const scan = jest.fn().mockResolvedValue(null);
-    (useScan as jest.Mock).mockReturnValue({
-      scan,
-      isScanning: false,
-      scanError:
-        "Het scannen heeft geen bruikbare gegevens opgeleverd. Probeer opnieuw te scannen.",
-    });
+  it("shows the Dutch empty state when the list is empty", () => {
+    mockExpensesList({ data: makeListResponse([]) });
 
-    const { findByText, getByText } = render(<Expenses />);
-    fireEvent.press(getByText("Bon scannen"));
+    const { getByText } = renderScreen();
 
-    expect(
-      await findByText(
-        "Het scannen heeft geen bruikbare gegevens opgeleverd. Probeer opnieuw te scannen.",
-      ),
-    ).toBeTruthy();
+    expect(getByText("Geen kosten gevonden")).toBeTruthy();
   });
 
-  it("disables the scan button while scanning", () => {
-    (useScan as jest.Mock).mockReturnValue({
-      scan: jest.fn(),
-      isScanning: true,
-      scanError: null,
+  it("shows a Dutch error message when the query fails", () => {
+    mockExpensesList({ isError: true, error: new Error("network down") });
+
+    const { getByText } = renderScreen();
+
+    expect(getByText(/network down/)).toBeTruthy();
+  });
+
+  it("filters the rendered cards by the search text", () => {
+    mockExpensesList({
+      data: makeListResponse([
+        makeExpense({ _id: "e1", info: "Lunch", contactName: "Acme" }),
+        makeExpense({ _id: "e2", info: "Taxi", contactName: "Bravo" }),
+      ]),
     });
 
-    const { getByText } = render(<Expenses />);
+    const { getByPlaceholderText, getByText, queryByText } = renderScreen();
 
-    expect(getByText("Bon scannen...")).toBeTruthy();
+    fireEvent.changeText(getByPlaceholderText("Zoek kosten..."), "Bravo");
+
+    expect(getByText("#1 - Taxi")).toBeTruthy();
+    expect(queryByText("#1 - Lunch")).toBeNull();
+  });
+
+  it("navigates to the expense's details when its card is pressed", () => {
+    mockExpensesList({ data: makeListResponse([makeExpense({ _id: "e42" })]) });
+
+    const { getByText } = renderScreen();
+    fireEvent.press(getByText("#1 - Lunch"));
+
+    expect(mockPush).toHaveBeenCalledWith("/expenses/e42");
+  });
+
+  it("navigates to the create route when the FAB is pressed", () => {
+    mockExpensesList({ data: makeListResponse([]) });
+
+    const { getByTestId } = renderScreen();
+    fireEvent.press(getByTestId("expenses-fab"));
+
+    expect(mockPush).toHaveBeenCalledWith("/expenses/edit/create");
+  });
+
+  describe("pagination", () => {
+    it("loads the next page when onEndReached fires and hasNextPage is true", async () => {
+      mockExpensesList({
+        data: makeListResponse([makeExpense({ _id: "e1" })], { hasNextPage: true }),
+      });
+      (expensesService.getExpenses as jest.Mock).mockResolvedValue(
+        makeListResponse([makeExpense({ _id: "e2", info: "Taxi" })]),
+      );
+
+      const { getByTestId, findByText } = renderScreen();
+      fireEvent(getByTestId("expenses-list"), "endReached");
+
+      expect(await findByText("#1 - Taxi")).toBeTruthy();
+      expect(expensesService.getExpenses).toHaveBeenCalledWith({ offset: 10, limit: 10 });
+    });
+
+    it("does not fetch another page when hasNextPage is false", () => {
+      mockExpensesList({
+        data: makeListResponse([makeExpense({ _id: "e1" })], { hasNextPage: false }),
+      });
+
+      const { getByTestId } = renderScreen();
+      fireEvent(getByTestId("expenses-list"), "endReached");
+
+      expect(expensesService.getExpenses).not.toHaveBeenCalled();
+    });
+
+    it("does not start a second fetch for the same page while the first is still in flight", async () => {
+      mockExpensesList({
+        data: makeListResponse([makeExpense({ _id: "e1" })], { hasNextPage: true }),
+      });
+      let resolveFetch: (value: ExpensesResponse) => void = () => {};
+      (expensesService.getExpenses as jest.Mock).mockReturnValue(
+        new Promise((resolve) => {
+          resolveFetch = resolve;
+        }),
+      );
+
+      const { getByTestId } = renderScreen();
+      fireEvent(getByTestId("expenses-list"), "endReached");
+      fireEvent(getByTestId("expenses-list"), "endReached");
+
+      expect(expensesService.getExpenses).toHaveBeenCalledTimes(1);
+
+      resolveFetch(makeListResponse([makeExpense({ _id: "e2", info: "Taxi" })]));
+      await waitFor(() => expect(expensesService.getExpenses).toHaveBeenCalledTimes(1));
+    });
+  });
+
+  it("invalidates the expenses query when pulled to refresh", async () => {
+    mockExpensesList({ data: makeListResponse([makeExpense()]) });
+    const { getByTestId, client } = renderScreen();
+    const invalidateSpy = jest.spyOn(client, "invalidateQueries");
+
+    fireEvent(getByTestId("expenses-list"), "refresh");
+
+    await waitFor(() =>
+      expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: QueryKeys.expenses.base }),
+    );
   });
 });
