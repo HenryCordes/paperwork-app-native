@@ -8,7 +8,7 @@ import {
   View,
   useColorScheme,
 } from "react-native";
-import { Href, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { useQueryClient } from "@tanstack/react-query";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
@@ -158,8 +158,7 @@ export default function Expenses() {
         testID="expenses-fab"
         accessibilityLabel="Nieuwe kosten toevoegen"
         style={styles.fabPosition}
-        // Cast needed until Task 7 adds src/app/expenses/edit/[id].tsx.
-        onPress={() => router.push("/expenses/edit/create" as Href)}
+        onPress={() => router.push("/expenses/edit/create")}
       >
         <Card style={[styles.fab, { backgroundColor: colors.primary }]}>
           <Ionicons name="add" size={28} color="#ffffff" />

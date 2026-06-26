@@ -1,6 +1,6 @@
 import { useLayoutEffect } from "react";
 import { Alert, Linking, Pressable, StyleSheet, Text, View, useColorScheme } from "react-native";
-import { Href, useLocalSearchParams, useNavigation, useRouter } from "expo-router";
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
 import { useExpenseById, useDeleteExpense } from "@/hooks/useExpenses";
@@ -46,8 +46,7 @@ export default function ExpenseDetails() {
           <View style={styles.headerActions}>
             <Pressable
               accessibilityLabel="Bewerken"
-              // Cast needed until Task 7 adds src/app/expenses/edit/[id].tsx.
-              onPress={() => router.push(`/expenses/edit/${id}` as Href)}
+              onPress={() => router.push(`/expenses/edit/${id}`)}
             >
               <Ionicons name="create-outline" size={22} color={colors.primary} />
             </Pressable>
