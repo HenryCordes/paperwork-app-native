@@ -25,4 +25,13 @@ describe("pairBarData", () => {
     expect(result[0].frontColor).toBe("#111111");
     expect(result[1].frontColor).toBe("#222222");
   });
+
+  // The dashboard API returns English month names regardless of the app's
+  // Dutch locale (e.g. "January 2025") - confirmed on a real device.
+  it("translates English month names in labels to Dutch", () => {
+    const result = pairBarData(["January 2025", "March 2025"], [1000, 1200], [400, 500]);
+
+    expect(result[0].label).toBe("Januari 2025");
+    expect(result[2].label).toBe("Maart 2025");
+  });
 });

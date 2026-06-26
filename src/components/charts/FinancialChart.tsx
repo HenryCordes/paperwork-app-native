@@ -10,7 +10,7 @@ import {
 
 import { pairBarData, type BarDataItem } from "./barPairing";
 import { ChartLegend } from "./ChartLegend";
-import { formatCurrency } from "@/utils/currency";
+import { formatCurrency, formatCurrencyWhole } from "@/utils/currency";
 import { Colors } from "@/constants/theme";
 import { ChartColors } from "@/constants/chartColors";
 
@@ -61,7 +61,17 @@ export function FinancialChart({
         <BarChart
           data={barData}
           {...(containerWidth !== null ? { parentWidth: containerWidth } : {})}
-          formatYLabel={(label: string) => formatCurrency(Number(label))}
+          rulesType="solid"
+          rulesColor={
+            scheme === "dark" ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.1)"
+          }
+          verticalLinesColor={
+            scheme === "dark" ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.1)"
+          }
+          barWidth={22}
+          yAxisTextStyle={{ color: colors.textSecondary }}
+          xAxisLabelTextStyle={{ color: colors.textSecondary }}
+          formatYLabel={(label: string) => formatCurrencyWhole(Number(label))}
           renderTooltip={(item: BarDataItem) => (
             <View
               style={[
