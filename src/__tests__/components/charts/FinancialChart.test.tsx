@@ -69,4 +69,17 @@ describe("FinancialChart", () => {
       getByText("Geen gegevens beschikbaar voor deze periode"),
     ).toBeTruthy();
   });
+
+  // Bug, confirmed on a real device: the empty-state message rendered in the
+  // default (near-black) text color, inconsistent with every other
+  // secondary-tone message on this screen (e.g. "Laden...").
+  it("shows the empty-state message in the secondary (gray) text color", () => {
+    const { getByText } = render(
+      <FinancialChart labels={[]} turnover={[]} expenses={[]} />,
+    );
+
+    expect(
+      getByText("Geen gegevens beschikbaar voor deze periode"),
+    ).toHaveStyle({ color: "#636469" });
+  });
 });

@@ -40,7 +40,7 @@ export function FinancialChart({
 
   if (labels.length === 0) {
     return (
-      <Text style={styles.emptyMessage}>
+      <Text style={[styles.emptyMessage, { color: colors.textSecondary }]}>
         Geen gegevens beschikbaar voor deze periode
       </Text>
     );
@@ -70,8 +70,9 @@ export function FinancialChart({
           }
           barWidth={16}
           rotateLabel
-          yAxisLabelWidth={56}
-          yAxisTextStyle={{ color: colors.textSecondary }}
+          labelsExtraHeight={24}
+          yAxisLabelWidth={72}
+          yAxisTextStyle={{ color: colors.textSecondary, textAlign: "left" }}
           xAxisLabelTextStyle={{ color: colors.textSecondary }}
           formatYLabel={(label: string) => `€${formatCurrencyWhole(Number(label))}`}
           renderTooltip={(item: BarDataItem) => (

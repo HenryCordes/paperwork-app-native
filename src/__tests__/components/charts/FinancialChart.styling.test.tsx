@@ -49,7 +49,29 @@ describe("FinancialChart styling", () => {
 
     const [props] = (BarChart as jest.Mock).mock.calls[0];
     expect(props.formatYLabel("14000")).toBe("€14.000");
-    expect(props.yAxisLabelWidth).toBe(56);
+    // Bug, confirmed on a real device: 56 was still not enough room for a
+    // value like "€14.000" and kept clipping behind the chart - widened
+    // further.
+    expect(props.yAxisLabelWidth).toBe(72);
+    // Bug, confirmed on a real device: the Y-axis labels were
+    // right-aligned (hugging the plot area); the source left-aligns them.
+    expect(props.yAxisTextStyle).toEqual(
+      expect.objectContaining({ textAlign: "left" }),
+    );
+  });
+
+  // Bug, confirmed on a real device: the skewed x-axis date labels were
+  // invisible - the legend below the chart appeared right where the labels
+  // should have been. rotateLabel needs extra reserved height for the
+  // diagonal text, which the chart's overflow:"hidden" container was
+  // otherwise clipping.
+  it("reserves extra height for the rotated x-axis labels so they aren't clipped", () => {
+    (useColorScheme as jest.Mock).mockReturnValue("dark");
+
+    render(<FinancialChart labels={["Jan"]} turnover={[1000]} expenses={[400]} />);
+
+    const [props] = (BarChart as jest.Mock).mock.calls[0];
+    expect(props.labelsExtraHeight).toBe(24);
   });
 
   // The source's x-axis labels render at a skewed angle, which gives each
