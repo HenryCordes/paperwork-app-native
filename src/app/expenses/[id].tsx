@@ -60,6 +60,9 @@ export default function ExpenseDetails() {
     navigation.setOptions({
       headerShown: true,
       title: "Kosten details",
+      headerStyle: { backgroundColor: colors.background },
+      headerTitleStyle: { color: colors.text },
+      headerTintColor: colors.primary,
       headerRight: () =>
         expense ? (
           <View style={styles.headerActions}>
@@ -76,7 +79,7 @@ export default function ExpenseDetails() {
         ) : undefined,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- handleDeletePress is recreated each render but its identity isn't a meaningful dependency here
-  }, [navigation, expense, colors.primary, colors.danger, id]);
+  }, [navigation, expense, colors.primary, colors.danger, colors.background, colors.text, id]);
 
   let documentUrl: string | null = null;
   if (expense?.expenseFile) {
@@ -95,7 +98,7 @@ export default function ExpenseDetails() {
         </Text>
       ) : isLoading ? null : expense ? (
         <>
-          <Card style={styles.card}>
+          <Card testID="expense-detail-card" bordered style={styles.card}>
             <Text style={[styles.title, { color: colors.text }]}>
               #{expense.expenseNumber} - {expense.info || "Bon"}
             </Text>
@@ -130,7 +133,7 @@ export default function ExpenseDetails() {
               <Text style={[styles.title, { color: colors.text }]}>Document</Text>
               <Pressable onPress={() => handleOpenDocument(expense.expenseFile!)}>
                 {documentUrl ? (
-                  <Card style={styles.documentCard}>
+                  <Card testID="expense-document-card" bordered style={styles.documentCard}>
                     <Image
                       testID="expense-document-image"
                       source={{ uri: documentUrl }}
@@ -140,7 +143,7 @@ export default function ExpenseDetails() {
                     />
                   </Card>
                 ) : (
-                  <Card style={styles.card}>
+                  <Card bordered style={styles.card}>
                     <Text style={{ color: colors.primary }}>Bon bekijken</Text>
                   </Card>
                 )}

@@ -99,6 +99,14 @@ describe("Expenses (Kosten) List screen", () => {
     expect(getByText("€9,00")).toBeTruthy();
   });
 
+  it("renders each card with a visible border", () => {
+    mockExpensesList({ data: makeListResponse([makeExpense()]) });
+
+    const { getByTestId } = renderScreen();
+
+    expect(getByTestId("expense-card")).toHaveStyle({ borderWidth: 10 });
+  });
+
   it("shows the Dutch empty state when the list is empty", () => {
     mockExpensesList({ data: makeListResponse([]) });
 

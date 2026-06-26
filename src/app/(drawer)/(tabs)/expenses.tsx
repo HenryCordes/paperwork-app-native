@@ -1,3 +1,6 @@
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
   FlatList,
@@ -8,16 +11,13 @@ import {
   View,
   useColorScheme,
 } from "react-native";
-import { useRouter } from "expo-router";
-import { useQueryClient } from "@tanstack/react-query";
-import Ionicons from "@expo/vector-icons/Ionicons";
 
-import { useExpensesList } from "@/hooks/useExpenses";
-import expensesService from "@/api/services/expensesService";
 import QueryKeys from "@/api/queryKeys";
+import expensesService from "@/api/services/expensesService";
 import { Expense } from "@/api/types/expenses";
 import { Card } from "@/components/Card";
 import { Colors, Spacing } from "@/constants/theme";
+import { useExpensesList } from "@/hooks/useExpenses";
 import { formatCurrency } from "@/utils/currency";
 
 const LIMIT = 10;
@@ -50,7 +50,10 @@ export default function Expenses() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const isLoadingMoreRef = useRef(false);
 
-  const { data, isLoading, isError, error } = useExpensesList({ offset: 0, limit: LIMIT });
+  const { data, isLoading, isError, error } = useExpensesList({
+    offset: 0,
+    limit: LIMIT,
+  });
 
   useEffect(() => {
     if (data?.data.docs) {
@@ -77,7 +80,10 @@ export default function Expenses() {
     try {
       const nextPage = page + 1;
       const offset = nextPage * LIMIT;
-      const response = await expensesService.getExpenses({ offset, limit: LIMIT });
+      const response = await expensesService.getExpenses({
+        offset,
+        limit: LIMIT,
+      });
 
       setHasNextPage(response.data.hasNextPage);
       if (response.data.docs.length > 0) {
@@ -91,7 +97,7 @@ export default function Expenses() {
 
   const renderExpense = ({ item }: { item: Expense }) => (
     <Pressable onPress={() => router.push(`/expenses/${item._id}`)}>
-      <Card style={styles.card}>
+      <Card testID="expense-card" bordered style={styles.card}>
         <Text style={[styles.title, { color: colors.text }]}>
           #{item.expenseNumber} - {item.info}
         </Text>
@@ -107,15 +113,21 @@ export default function Expenses() {
         </View>
         <View style={styles.row}>
           <Text style={{ color: colors.textSecondary }}>Bedrag</Text>
-          <Text style={{ color: colors.text }}>€{formatCurrency(item.price || 0)}</Text>
+          <Text style={{ color: colors.text }}>
+            €{formatCurrency(item.price || 0)}
+          </Text>
         </View>
         <View style={styles.row}>
           <Text style={{ color: colors.textSecondary }}>BTW 21%</Text>
-          <Text style={{ color: colors.text }}>€{formatCurrency(item.tax || 0)}</Text>
+          <Text style={{ color: colors.text }}>
+            €{formatCurrency(item.tax || 0)}
+          </Text>
         </View>
         <View style={styles.row}>
           <Text style={{ color: colors.textSecondary }}>BTW 9%</Text>
-          <Text style={{ color: colors.text }}>€{formatCurrency(item.taxLow || 0)}</Text>
+          <Text style={{ color: colors.text }}>
+            €{formatCurrency(item.taxLow || 0)}
+          </Text>
         </View>
       </Card>
     </Pressable>
@@ -190,11 +202,11 @@ const styles = StyleSheet.create({
     marginTop: Spacing.four,
   },
   listContent: {
-    gap: Spacing.three,
+    gap: Spacing.two,
     paddingBottom: Spacing.six,
   },
   card: {
-    gap: Spacing.one,
+    gap: Spacing.half,
   },
   title: {
     fontWeight: "600",

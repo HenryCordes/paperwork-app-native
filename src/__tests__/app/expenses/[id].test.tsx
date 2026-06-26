@@ -135,6 +135,28 @@ describe("Expense Details screen", () => {
     expect(mockBack).toHaveBeenCalled();
   });
 
+  it("renders the info card and the document card with a visible border", () => {
+    mockExpenseById({
+      data: { success: true, data: makeExpense({ expenseFile: "receipts/abc.jpg" }) },
+    });
+
+    const { getByTestId } = render(<ExpenseDetails />);
+
+    expect(getByTestId("expense-detail-card")).toHaveStyle({ borderWidth: 10 });
+    expect(getByTestId("expense-document-card")).toHaveStyle({ borderWidth: 10 });
+  });
+
+  it("themes the native header for dark mode instead of leaving it on the stock light defaults", () => {
+    mockExpenseById({ data: { success: true, data: makeExpense() } });
+
+    render(<ExpenseDetails />);
+
+    const options = mockSetOptions.mock.calls.at(-1)?.[0];
+    expect(options.headerStyle).toEqual({ backgroundColor: "#ffffff" });
+    expect(options.headerTitleStyle).toEqual({ color: "#000000" });
+    expect(options.headerTintColor).toBe("#0054e9");
+  });
+
   it("shows the receipt image when expenseFile is present", () => {
     mockExpenseById({
       data: { success: true, data: makeExpense({ expenseFile: "receipts/abc.jpg" }) },
