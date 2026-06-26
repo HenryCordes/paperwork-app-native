@@ -13,6 +13,7 @@ import { useDashboardStats } from "@/hooks/useDashboard";
 import { FinancialChart } from "@/components/charts/FinancialChart";
 import { PieChart } from "@/components/charts/PieChart";
 import { PeriodSelector } from "@/components/PeriodSelector";
+import { Card } from "@/components/Card";
 import { PeriodType, PeriodPreset, RawDataPoint } from "@/api/types/dashboard";
 import { PERIOD_PRESETS, PERIOD_TYPES } from "@/constants/dashboardConstants";
 import { formatCurrency } from "@/utils/currency";
@@ -122,39 +123,57 @@ export default function Dashboard() {
         ) : (
           <>
             <View style={styles.summaryRow}>
-              <View style={styles.summaryCard}>
-                <Text style={{ color: colors.primary }}>Omzet</Text>
+              <Card style={styles.summaryCard}>
+                <Text style={[styles.summaryLabel, { color: colors.primary }]}>
+                  Omzet
+                </Text>
                 <Text style={{ color: colors.text }}>
                   €{formatCurrency(summary.totalRevenue)}
                 </Text>
-              </View>
-              <View style={styles.summaryCard}>
-                <Text style={{ color: colors.danger }}>Uitgaven</Text>
+              </Card>
+              <Card style={styles.summaryCard}>
+                <Text style={[styles.summaryLabel, { color: colors.danger }]}>
+                  Uitgaven
+                </Text>
                 <Text style={{ color: colors.text }}>
                   €{formatCurrency(summary.totalExpenses)}
                 </Text>
-              </View>
-              <View style={styles.summaryCard}>
+              </Card>
+              <Card style={styles.summaryCard}>
                 <Text
-                  style={{
-                    color: summary.netProfit >= 0 ? colors.success : colors.danger,
-                  }}
+                  style={[
+                    styles.summaryLabel,
+                    { color: summary.netProfit >= 0 ? colors.success : colors.danger },
+                  ]}
                 >
                   {summary.netProfit >= 0 ? "Winst" : "Verlies"}
                 </Text>
                 <Text style={{ color: colors.text }}>
                   €{formatCurrency(summary.netProfit)}
                 </Text>
-              </View>
+              </Card>
             </View>
 
-            <FinancialChart
-              labels={data?.data.labels ?? []}
-              turnover={data?.data.turnover ?? []}
-              expenses={data?.data.expenses ?? []}
-            />
+            <Card>
+              <Text style={[styles.cardTitle, { color: colors.text }]}>
+                {periodLabel(periodType, periodPreset)}
+              </Text>
+              <FinancialChart
+                labels={data?.data.labels ?? []}
+                turnover={data?.data.turnover ?? []}
+                expenses={data?.data.expenses ?? []}
+              />
+            </Card>
 
-            <PieChart revenue={summary.totalRevenue} expenses={summary.totalExpenses} />
+            <Card>
+              <Text style={[styles.cardTitle, { color: colors.text }]}>
+                Omzet vs Uitgaven
+              </Text>
+              <PieChart
+                revenue={summary.totalRevenue}
+                expenses={summary.totalExpenses}
+              />
+            </Card>
           </>
         )}
       </ScrollView>
@@ -189,5 +208,15 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     gap: Spacing.one,
+  },
+  summaryLabel: {
+    textTransform: "uppercase",
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    marginBottom: Spacing.two,
   },
 });

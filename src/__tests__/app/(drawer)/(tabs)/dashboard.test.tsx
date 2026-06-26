@@ -142,6 +142,24 @@ describe("Dashboard screen", () => {
     expect(queryByText("Per")).toBeTruthy();
   });
 
+  it("shows each chart inside its own titled card, matching the source's two separate chart cards", () => {
+    mockStats({
+      data: {
+        success: true,
+        data: { labels: ["Jan"], turnover: [1000], expenses: [400], rawData: [] },
+        source: "pre-calculated",
+        periodInfo: { startDate: "", endDate: "", groupingLevel: "monthly" },
+      },
+    });
+
+    const { getAllByText, getByText } = render(<Dashboard />);
+
+    // The period label appears twice: once as the page's own title, once
+    // again as the bar-chart card's title - matching the source exactly.
+    expect(getAllByText("Overzicht Dit Jaar")).toHaveLength(2);
+    expect(getByText("Omzet vs Uitgaven")).toBeTruthy();
+  });
+
   it("pads the top of the screen by the safe-area inset so the header isn't hidden behind the status bar", () => {
     mockStats({});
     const { getByTestId } = render(<Dashboard />);
