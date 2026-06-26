@@ -119,6 +119,15 @@ describe("Expense Edit/Create screen", () => {
         expect.anything(),
       );
     });
+
+    it("themes the native header instead of leaving it on the stock light defaults", () => {
+      render(<ExpenseEdit />);
+
+      const options = mockSetOptions.mock.calls.at(-1)?.[0];
+      expect(options.headerStyle).toEqual({ backgroundColor: "#ffffff" });
+      expect(options.headerTitleStyle).toEqual({ color: "#000000" });
+      expect(options.headerTintColor).toBe("#0054e9");
+    });
   });
 
   describe("edit mode", () => {

@@ -87,8 +87,11 @@ export default function ExpenseEdit() {
     navigation.setOptions({
       headerShown: true,
       title: `Kosten ${id !== "create" ? "Bewerken" : "Toevoegen"}`,
+      headerStyle: { backgroundColor: colors.background },
+      headerTitleStyle: { color: colors.text },
+      headerTintColor: colors.primary,
     });
-  }, [navigation, id]);
+  }, [navigation, id, colors.background, colors.text, colors.primary]);
 
   const contactOptions = (contactsData?.data.docs ?? []).map((contact) => ({
     value: contact._id,
