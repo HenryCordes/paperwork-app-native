@@ -12,7 +12,7 @@ describe("Card", () => {
     );
 
     expect(getByText("content")).toBeTruthy();
-    expect(getByTestId("card")).toHaveStyle({ borderRadius: 12 });
+    expect(getByTestId("card")).toHaveStyle({ borderRadius: 12, borderWidth: 1 });
   });
 
   it("merges a caller-supplied style on top of the card's own", () => {

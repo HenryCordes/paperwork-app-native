@@ -8,7 +8,11 @@ export function Card({ style, children, ...rest }: ViewProps) {
 
   return (
     <View
-      style={[styles.card, { backgroundColor: colors.backgroundElement }, style]}
+      style={[
+        styles.card,
+        { backgroundColor: colors.backgroundElement, borderColor: colors.border },
+        style,
+      ]}
       {...rest}
     >
       {children}
@@ -19,6 +23,7 @@ export function Card({ style, children, ...rest }: ViewProps) {
 const styles = StyleSheet.create({
   card: {
     borderRadius: 12,
+    borderWidth: 1,
     padding: Spacing.three,
   },
 });

@@ -1,5 +1,14 @@
 import { useLayoutEffect, useState } from "react";
-import { Alert, Linking, Pressable, StyleSheet, Text, View, useColorScheme } from "react-native";
+import {
+  Alert,
+  Image,
+  Linking,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  useColorScheme,
+} from "react-native";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
@@ -69,6 +78,15 @@ export default function ExpenseDetails() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- handleDeletePress is recreated each render but its identity isn't a meaningful dependency here
   }, [navigation, expense, colors.primary, colors.danger, id]);
 
+  let documentUrl: string | null = null;
+  if (expense?.expenseFile) {
+    try {
+      documentUrl = documentsService.getDocumentUrl(expense.expenseFile);
+    } catch {
+      documentUrl = null;
+    }
+  }
+
   return (
     <View testID="expense-details-screen" style={[styles.container, { backgroundColor: colors.background }]}>
       {isError ? (
@@ -108,11 +126,26 @@ export default function ExpenseDetails() {
           </Card>
 
           {expense.expenseFile ? (
-            <Pressable onPress={() => handleOpenDocument(expense.expenseFile!)}>
-              <Card style={styles.card}>
-                <Text style={{ color: colors.primary }}>Bon bekijken</Text>
-              </Card>
-            </Pressable>
+            <View style={styles.field}>
+              <Text style={[styles.title, { color: colors.text }]}>Document</Text>
+              <Pressable onPress={() => handleOpenDocument(expense.expenseFile!)}>
+                {documentUrl ? (
+                  <Card style={styles.documentCard}>
+                    <Image
+                      testID="expense-document-image"
+                      source={{ uri: documentUrl }}
+                      style={styles.documentImage}
+                      resizeMode="contain"
+                      onError={() => setOpenDocumentError("Document preview niet beschikbaar")}
+                    />
+                  </Card>
+                ) : (
+                  <Card style={styles.card}>
+                    <Text style={{ color: colors.primary }}>Bon bekijken</Text>
+                  </Card>
+                )}
+              </Pressable>
+            </View>
           ) : null}
 
           {openDocumentError ? (
@@ -137,6 +170,9 @@ const styles = StyleSheet.create({
   card: {
     gap: Spacing.one,
   },
+  field: {
+    gap: Spacing.one,
+  },
   title: {
     fontWeight: "600",
     marginBottom: Spacing.one,
@@ -144,6 +180,14 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
+  },
+  documentCard: {
+    padding: 0,
+    overflow: "hidden",
+  },
+  documentImage: {
+    width: "100%",
+    height: 400,
   },
   totalLabel: {
     fontWeight: "600",

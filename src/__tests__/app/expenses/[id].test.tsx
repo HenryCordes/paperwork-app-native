@@ -4,6 +4,7 @@ import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 
 import ExpenseDetails from "@/app/expenses/[id]";
 import { useExpenseById, useDeleteExpense } from "@/hooks/useExpenses";
+import documentsService from "@/api/services/documentsService";
 import type { Expense, ExpenseDetailResponse } from "@/api/types/expenses";
 
 jest.mock("expo-router", () => ({
@@ -12,6 +13,12 @@ jest.mock("expo-router", () => ({
   useLocalSearchParams: jest.fn(),
 }));
 jest.mock("@/hooks/useExpenses");
+jest.mock("@/api/services/documentsService", () => ({
+  __esModule: true,
+  default: {
+    getDocumentUrl: jest.fn((path: string) => `https://api.example.com/document/${path}`),
+  },
+}));
 jest.spyOn(Alert, "alert").mockImplementation(() => {});
 
 const mockSetOptions = jest.fn();
@@ -128,22 +135,40 @@ describe("Expense Details screen", () => {
     expect(mockBack).toHaveBeenCalled();
   });
 
-  it('shows a "view receipt" action when expenseFile is present', () => {
+  it("shows the receipt image when expenseFile is present", () => {
     mockExpenseById({
       data: { success: true, data: makeExpense({ expenseFile: "receipts/abc.jpg" }) },
     });
 
-    const { getByText } = render(<ExpenseDetails />);
+    const { getByText, getByTestId } = render(<ExpenseDetails />);
 
-    expect(getByText("Bon bekijken")).toBeTruthy();
+    expect(getByText("Document")).toBeTruthy();
+    expect(getByTestId("expense-document-image").props.source).toEqual({
+      uri: "https://api.example.com/document/receipts/abc.jpg",
+    });
   });
 
-  it('does not show a "view receipt" action when expenseFile is absent', () => {
+  it("does not show a document section when expenseFile is absent", () => {
     mockExpenseById({ data: { success: true, data: makeExpense({ expenseFile: undefined }) } });
 
-    const { queryByText } = render(<ExpenseDetails />);
+    const { queryByText, queryByTestId } = render(<ExpenseDetails />);
 
-    expect(queryByText("Bon bekijken")).toBeNull();
+    expect(queryByText("Document")).toBeNull();
+    expect(queryByTestId("expense-document-image")).toBeNull();
+  });
+
+  it("opens the receipt when its image is pressed", () => {
+    jest.spyOn(Linking, "openURL").mockResolvedValue(true);
+    mockExpenseById({
+      data: { success: true, data: makeExpense({ expenseFile: "receipts/abc.jpg" }) },
+    });
+
+    const { getByTestId } = render(<ExpenseDetails />);
+    fireEvent.press(getByTestId("expense-document-image"));
+
+    expect(Linking.openURL).toHaveBeenCalledWith(
+      "https://api.example.com/document/receipts/abc.jpg",
+    );
   });
 
   it("shows an inline Dutch error when opening the receipt fails", async () => {
@@ -152,9 +177,23 @@ describe("Expense Details screen", () => {
       data: { success: true, data: makeExpense({ expenseFile: "receipts/abc.jpg" }) },
     });
 
-    const { getByText, findByText } = render(<ExpenseDetails />);
-    fireEvent.press(getByText("Bon bekijken"));
+    const { getByTestId, findByText } = render(<ExpenseDetails />);
+    fireEvent.press(getByTestId("expense-document-image"));
 
     expect(await findByText("Kan de bon niet openen")).toBeTruthy();
+  });
+
+  it("falls back to a plain open action when the document URL can't be built", () => {
+    (documentsService.getDocumentUrl as jest.Mock).mockImplementationOnce(() => {
+      throw new Error("API base URL not configured");
+    });
+    mockExpenseById({
+      data: { success: true, data: makeExpense({ expenseFile: "receipts/abc.jpg" }) },
+    });
+
+    const { getByText, queryByTestId } = render(<ExpenseDetails />);
+
+    expect(queryByTestId("expense-document-image")).toBeNull();
+    expect(getByText("Bon bekijken")).toBeTruthy();
   });
 });
