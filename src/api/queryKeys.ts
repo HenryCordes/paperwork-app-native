@@ -12,6 +12,10 @@ const QueryKeys = {
     stats: (params: DashboardStatsRequest) =>
       [...QueryKeys.dashboard.base, "stats", params] as const,
   },
+  contacts: {
+    base: ["contacts"] as const,
+    list: () => [...QueryKeys.contacts.base, "list"] as const,
+  },
 };
 
 export default QueryKeys;
