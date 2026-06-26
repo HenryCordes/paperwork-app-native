@@ -76,5 +76,14 @@ describe("DocumentsService", () => {
         "Failed to upload document",
       );
     });
+
+    it("throws when the response is missing a fileLocation", async () => {
+      mockAxios.post.mockResolvedValue({ data: { success: true, data: {} } });
+      const service = new DocumentsService(mockAxios as never);
+
+      await expect(service.uploadReceiptDocument(file)).rejects.toThrow(
+        "Failed to upload document",
+      );
+    });
   });
 });

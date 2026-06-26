@@ -170,6 +170,17 @@ describe("Expense Details screen", () => {
     });
   });
 
+  it("shows a fallback message when the image itself fails to load", async () => {
+    mockExpenseById({
+      data: { success: true, data: makeExpense({ expenseFile: "receipts/abc.jpg" }) },
+    });
+
+    const { getByTestId, findByText } = render(<ExpenseDetails />);
+    fireEvent(getByTestId("expense-document-image"), "error");
+
+    expect(await findByText("Document preview niet beschikbaar")).toBeTruthy();
+  });
+
   it("does not show a document section when expenseFile is absent", () => {
     mockExpenseById({ data: { success: true, data: makeExpense({ expenseFile: undefined }) } });
 

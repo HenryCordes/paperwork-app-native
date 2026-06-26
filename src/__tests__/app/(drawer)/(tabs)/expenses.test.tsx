@@ -5,6 +5,7 @@ import { useRouter } from "expo-router";
 import Expenses from "@/app/(drawer)/(tabs)/expenses";
 import { useExpensesList } from "@/hooks/useExpenses";
 import expensesService from "@/api/services/expensesService";
+import QueryKeys from "@/api/queryKeys";
 import type { Expense, ExpensesResponse } from "@/api/types/expenses";
 
 jest.mock("expo-router", () => ({ useRouter: jest.fn() }));
@@ -18,11 +19,12 @@ const mockPush = jest.fn();
 
 function renderScreen() {
   const client = new QueryClient();
-  return render(
+  const result = render(
     <QueryClientProvider client={client}>
       <Expenses />
     </QueryClientProvider>,
   );
+  return { ...result, client };
 }
 
 function makeExpense(overrides: Partial<Expense> = {}): Expense {
@@ -204,5 +206,17 @@ describe("Expenses (Kosten) List screen", () => {
       resolveFetch(makeListResponse([makeExpense({ _id: "e2", info: "Taxi" })]));
       await waitFor(() => expect(expensesService.getExpenses).toHaveBeenCalledTimes(1));
     });
+  });
+
+  it("invalidates the expenses query when pulled to refresh", async () => {
+    mockExpensesList({ data: makeListResponse([makeExpense()]) });
+    const { getByTestId, client } = renderScreen();
+    const invalidateSpy = jest.spyOn(client, "invalidateQueries");
+
+    fireEvent(getByTestId("expenses-list"), "refresh");
+
+    await waitFor(() =>
+      expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: QueryKeys.expenses.base }),
+    );
   });
 });

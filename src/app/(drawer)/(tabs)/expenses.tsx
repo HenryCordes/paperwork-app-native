@@ -57,6 +57,7 @@ export default function Expenses() {
 
   useEffect(() => {
     if (data?.data.docs) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing locally-accumulated pagination state (allExpenses/hasNextPage/page) from the query result; loadMore appends pages the query cache itself doesn't track, so this can't be computed inline.
       setAllExpenses(data.data.docs);
       setHasNextPage(data.data.hasNextPage);
       setPage(0);

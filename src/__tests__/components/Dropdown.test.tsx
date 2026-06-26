@@ -34,4 +34,30 @@ describe("Dropdown", () => {
     expect(onSelect).toHaveBeenCalledWith("b");
     expect(queryByText("Optie B")).toBeNull();
   });
+
+  it("closes without selecting when the overlay is pressed", () => {
+    const onSelect = jest.fn();
+    const { getByTestId, queryByText } = render(
+      <Dropdown testID="test-dropdown" label="Kies" value="a" options={options} onSelect={onSelect} />,
+    );
+
+    fireEvent.press(getByTestId("test-dropdown"));
+    fireEvent.press(getByTestId("test-dropdown-overlay"));
+
+    expect(onSelect).not.toHaveBeenCalled();
+    expect(queryByText("Optie B")).toBeNull();
+  });
+
+  it("closes without selecting when the system back action requests it", () => {
+    const onSelect = jest.fn();
+    const { getByTestId, queryByText } = render(
+      <Dropdown testID="test-dropdown" label="Kies" value="a" options={options} onSelect={onSelect} />,
+    );
+
+    fireEvent.press(getByTestId("test-dropdown"));
+    fireEvent(getByTestId("test-dropdown-modal"), "requestClose");
+
+    expect(onSelect).not.toHaveBeenCalled();
+    expect(queryByText("Optie B")).toBeNull();
+  });
 });

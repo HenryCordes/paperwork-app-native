@@ -50,8 +50,17 @@ export function Dropdown<T extends string>({
       </Pressable>
 
       {isOpen ? (
-        <Modal transparent animationType="fade" onRequestClose={() => setIsOpen(false)}>
-          <Pressable style={styles.overlay} onPress={() => setIsOpen(false)}>
+        <Modal
+          testID={`${testID}-modal`}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setIsOpen(false)}
+        >
+          <Pressable
+            testID={`${testID}-overlay`}
+            style={styles.overlay}
+            onPress={() => setIsOpen(false)}
+          >
             <Pressable
               style={[styles.optionsCard, { backgroundColor: colors.backgroundElement }]}
             >

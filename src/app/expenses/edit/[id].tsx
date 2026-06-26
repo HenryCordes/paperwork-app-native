@@ -60,6 +60,7 @@ export default function ExpenseEdit() {
 
   useEffect(() => {
     if (id === "create") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- resetting/pre-filling editable form state from the route param and the fetched expense; the form must diverge from expenseData once the user edits it, so it can't be computed inline during render.
       setFormData(defaultExpense);
       setScannedImage(null);
       return;

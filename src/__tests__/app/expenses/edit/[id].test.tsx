@@ -128,6 +128,35 @@ describe("Expense Edit/Create screen", () => {
       expect(options.headerTitleStyle).toEqual({ color: "#000000" });
       expect(options.headerTintColor).toBe("#0054e9");
     });
+
+    it("updates each field as the user types", () => {
+      const { getByTestId } = render(<ExpenseEdit />);
+
+      fireEvent.changeText(getByTestId("expense-info-input"), "Diner");
+      fireEvent.changeText(getByTestId("expense-date-input"), "2026-02-01");
+      fireEvent.changeText(getByTestId("expense-tax-input"), "5.5");
+      fireEvent.changeText(getByTestId("expense-taxlow-input"), "1.5");
+      fireEvent.changeText(getByTestId("expense-price-input"), "42");
+
+      expect(getByTestId("expense-info-input").props.value).toBe("Diner");
+      expect(getByTestId("expense-date-input").props.value).toBe("2026-02-01");
+      expect(getByTestId("expense-tax-input").props.value).toBe("5.5");
+      expect(getByTestId("expense-taxlow-input").props.value).toBe("1.5");
+      expect(getByTestId("expense-price-input").props.value).toBe("42");
+    });
+
+    it("navigates back after a successful save", async () => {
+      const successfulMutate = jest.fn((_data, { onSuccess }) => onSuccess());
+      (useCreateOrUpdateExpense as jest.Mock).mockReturnValue({
+        mutate: successfulMutate,
+        isPending: false,
+      });
+
+      const { getByTestId } = render(<ExpenseEdit />);
+      fireEvent.press(getByTestId("expense-save-button"));
+
+      await waitFor(() => expect(mockBack).toHaveBeenCalled());
+    });
   });
 
   describe("edit mode", () => {
@@ -208,6 +237,17 @@ describe("Expense Edit/Create screen", () => {
     beforeEach(() => {
       (useLocalSearchParams as jest.Mock).mockReturnValue({ id: "create" });
       mockExpenseById({});
+    });
+
+    it("leaves the form unchanged when the scan is cancelled", async () => {
+      const scan = jest.fn().mockResolvedValue(null);
+      mockScan({ scan });
+
+      const { getByTestId } = render(<ExpenseEdit />);
+      fireEvent.press(getByTestId("scan-button"));
+
+      await waitFor(() => expect(scan).toHaveBeenCalled());
+      expect(getByTestId("expense-price-input").props.value).toBe("0");
     });
 
     it("pre-fills expenseDate/price/tax/taxLow from the scan result", async () => {
