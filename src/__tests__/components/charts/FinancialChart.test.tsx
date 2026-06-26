@@ -48,6 +48,18 @@ describe("FinancialChart", () => {
     });
   });
 
+  // Bug, confirmed on a real device: the legend rendered flush against the
+  // chart's bottom edge with no breathing room - same issue already fixed
+  // for PieChart's legend, also needed here.
+  it("adds top margin between the chart and its legend", () => {
+    const { getByTestId } = render(
+      <FinancialChart labels={["Jan"]} turnover={[1000]} expenses={[400]} />,
+    );
+    expect(getByTestId("financial-chart-legend-wrapper")).toHaveStyle({
+      marginTop: 16,
+    });
+  });
+
   it("shows the Dutch empty-state message when there are no labels", () => {
     const { getByText } = render(
       <FinancialChart labels={[]} turnover={[]} expenses={[]} />,

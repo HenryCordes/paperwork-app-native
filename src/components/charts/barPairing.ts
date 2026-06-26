@@ -1,4 +1,4 @@
-import { toDutchMonthLabel } from "./monthLabels";
+import { toDutchChartLabel } from "./monthLabels";
 
 export interface BarDataItem {
   value: number;
@@ -29,7 +29,7 @@ export function pairBarData(
       value: turnover[index],
       frontColor: turnoverColor,
       spacing: 2,
-      label: toDutchMonthLabel(label),
+      label: toDutchChartLabel(label),
     },
     {
       value: expenses[index],

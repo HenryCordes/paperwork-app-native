@@ -24,4 +24,18 @@ describe("PieChart", () => {
       backgroundColor: ChartColors.expenses.light,
     });
   });
+
+  // Bug, confirmed on a real device: the legend rendered flush against the
+  // circle's bottom edge with no breathing room.
+  it("adds top margin between the pie and its legend", () => {
+    const { getByTestId } = render(<PieChart revenue={2200} expenses={900} />);
+    expect(getByTestId("pie-legend-wrapper")).toHaveStyle({ marginTop: 16 });
+  });
+
+  // Bug, confirmed on a real device: the circle rendered left-aligned
+  // within its container instead of centered.
+  it("centers the pie within its container", () => {
+    const { getByTestId } = render(<PieChart revenue={2200} expenses={900} />);
+    expect(getByTestId("pie-chart-container")).toHaveStyle({ alignItems: "center" });
+  });
 });

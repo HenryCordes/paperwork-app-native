@@ -58,4 +58,15 @@ describe("FinancialChart styling", () => {
       expect.objectContaining({ color: "#636469" }),
     );
   });
+
+  // Bars were visibly wider than the source's, even after an earlier pass
+  // (barWidth: 22) - narrowed further.
+  it("uses a narrow bar width matching the source's proportions", () => {
+    (useColorScheme as jest.Mock).mockReturnValue("dark");
+
+    render(<FinancialChart labels={["Jan"]} turnover={[1000]} expenses={[400]} />);
+
+    const [props] = (BarChart as jest.Mock).mock.calls[0];
+    expect(props.barWidth).toBe(16);
+  });
 });

@@ -11,7 +11,7 @@ import {
 import { pairBarData, type BarDataItem } from "./barPairing";
 import { ChartLegend } from "./ChartLegend";
 import { formatCurrency, formatCurrencyWhole } from "@/utils/currency";
-import { Colors } from "@/constants/theme";
+import { Colors, Spacing } from "@/constants/theme";
 import { ChartColors } from "@/constants/chartColors";
 
 interface FinancialChartProps {
@@ -68,7 +68,7 @@ export function FinancialChart({
           verticalLinesColor={
             scheme === "dark" ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.1)"
           }
-          barWidth={22}
+          barWidth={16}
           yAxisTextStyle={{ color: colors.textSecondary }}
           xAxisLabelTextStyle={{ color: colors.textSecondary }}
           formatYLabel={(label: string) => formatCurrencyWhole(Number(label))}
@@ -86,20 +86,22 @@ export function FinancialChart({
           )}
         />
       </View>
-      <ChartLegend
-        items={[
-          {
-            color: ChartColors.revenue[chartScheme],
-            label: "Omzet",
-            value: `€${formatCurrency(sum(turnover))}`,
-          },
-          {
-            color: ChartColors.expenses[chartScheme],
-            label: "Uitgaven",
-            value: `€${formatCurrency(sum(expenses))}`,
-          },
-        ]}
-      />
+      <View testID="financial-chart-legend-wrapper" style={styles.legendWrapper}>
+        <ChartLegend
+          items={[
+            {
+              color: ChartColors.revenue[chartScheme],
+              label: "Omzet",
+              value: `€${formatCurrency(sum(turnover))}`,
+            },
+            {
+              color: ChartColors.expenses[chartScheme],
+              label: "Uitgaven",
+              value: `€${formatCurrency(sum(expenses))}`,
+            },
+          ]}
+        />
+      </View>
     </View>
   );
 }
@@ -111,6 +113,9 @@ const styles = StyleSheet.create({
   chartContainer: {
     width: "100%",
     overflow: "hidden",
+  },
+  legendWrapper: {
+    marginTop: Spacing.three,
   },
   tooltip: {
     padding: 4,
