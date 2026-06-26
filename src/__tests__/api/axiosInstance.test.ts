@@ -33,4 +33,16 @@ describe("attachAuthToken", () => {
 
     expect(config.headers.Authorization).toBeUndefined();
   });
+
+  // Bug risk, flagged in code review: SecureStore.getItemAsync can reject on
+  // a real device (e.g. a transient keychain/keystore access error). Since
+  // this interceptor runs on every request, an unhandled rejection here
+  // would fail every API call, not just authenticated ones.
+  it("proceeds without a token when secureStorage.getItem rejects", async () => {
+    (secureStorage.getItem as jest.Mock).mockRejectedValue(new Error("keychain error"));
+
+    const config = await attachAuthToken(makeConfig());
+
+    expect(config.headers.Authorization).toBeUndefined();
+  });
 });
