@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Modal, Pressable, StyleSheet, Text, View, useColorScheme } from "react-native";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
 import { PeriodType, PeriodPreset } from "@/api/types/dashboard";
 import { PERIOD_PRESETS, PERIOD_TYPES } from "@/constants/dashboardConstants";
@@ -65,7 +66,12 @@ function Dropdown<T extends string>({
         onPress={() => setIsOpen(true)}
       >
         <Text style={{ color: colors.text }}>{labelFor(options, value)}</Text>
-        <Text style={{ color: colors.textSecondary }}>⌃⌄</Text>
+        <Ionicons
+          testID="dropdown-chevron"
+          name="chevron-expand"
+          size={16}
+          color={colors.textSecondary}
+        />
       </Pressable>
 
       {isOpen ? (

@@ -20,6 +20,22 @@ describe("PeriodSelector", () => {
     expect(queryByText("Vorig Jaar")).toBeNull();
   });
 
+  // Bug, confirmed on a real device: the two glyphs in a raw "⌃⌄" string
+  // render at visibly different sizes (font-dependent), looking unintentional
+  // rather than like a single disclosure affordance.
+  it("shows a single consistently-sized expand icon per dropdown, not raw chevron glyphs", () => {
+    const { getAllByTestId, queryByText } = render(
+      <PeriodSelector
+        periodType={PERIOD_TYPES.MONTHLY}
+        periodPreset={PERIOD_PRESETS.THIS_YEAR}
+        onPeriodChange={jest.fn()}
+      />,
+    );
+
+    expect(getAllByTestId("dropdown-chevron")).toHaveLength(2);
+    expect(queryByText("⌃⌄")).toBeNull();
+  });
+
   it("opens the type picker and calls onPeriodChange with the new type, keeping the current preset", () => {
     const onPeriodChange = jest.fn();
     const { getByText, getByTestId } = render(
