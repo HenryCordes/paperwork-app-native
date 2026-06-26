@@ -224,7 +224,6 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 16,
-    fontWeight: "600",
     textAlign: "center",
   },
   summaryRow: {
@@ -240,7 +239,6 @@ const styles = StyleSheet.create({
   },
   summaryValue: {
     fontSize: 13,
-    fontWeight: "600",
   },
   summaryLabel: {
     textTransform: "uppercase",

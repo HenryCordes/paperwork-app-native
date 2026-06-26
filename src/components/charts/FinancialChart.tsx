@@ -69,9 +69,11 @@ export function FinancialChart({
             scheme === "dark" ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.1)"
           }
           barWidth={16}
+          rotateLabel
+          yAxisLabelWidth={56}
           yAxisTextStyle={{ color: colors.textSecondary }}
           xAxisLabelTextStyle={{ color: colors.textSecondary }}
-          formatYLabel={(label: string) => formatCurrencyWhole(Number(label))}
+          formatYLabel={(label: string) => `€${formatCurrencyWhole(Number(label))}`}
           renderTooltip={(item: BarDataItem) => (
             <View
               style={[

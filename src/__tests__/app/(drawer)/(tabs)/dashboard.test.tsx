@@ -107,6 +107,18 @@ describe("Dashboard screen", () => {
     // white/black (colors.text), too high-contrast against the dimmer
     // uppercase labels above them - should use the same secondary tone.
     expect(getByText(/€600,00/)).toHaveStyle({ color: "#636469" });
+    // Bug, confirmed on a real device: the value was semi-bold (600);
+    // should be normal weight.
+    expect(getByText(/€600,00/)).not.toHaveStyle({ fontWeight: "600" });
+  });
+
+  it("shows the standalone period label in a normal (not bold) weight", () => {
+    mockStats({});
+    const { getAllByText } = render(<Dashboard />);
+    // First occurrence is the standalone title; the second is the bar-chart
+    // card's own title, which is intentionally bold and untouched by this fix.
+    const [standaloneTitle] = getAllByText("Overzicht Dit Jaar");
+    expect(standaloneTitle).not.toHaveStyle({ fontWeight: "600" });
   });
 
   it("shows Verlies (loss, red) when netProfit is negative", () => {

@@ -38,13 +38,31 @@ describe("FinancialChart styling", () => {
     );
   });
 
-  it("formats the Y-axis with whole euros (no cents) while the tooltip keeps exact cents", () => {
+  // Bug, confirmed on a real device: the Y-axis label had no euro sign at
+  // all (every other amount on this screen is prefixed with one), and the
+  // label text was clipped behind the chart's own plot area because the
+  // reserved label width didn't account for the "€" prefix.
+  it("formats the Y-axis with a euro sign and whole euros (no cents), with enough reserved width to avoid clipping", () => {
     (useColorScheme as jest.Mock).mockReturnValue("dark");
 
     render(<FinancialChart labels={["Jan"]} turnover={[1000]} expenses={[400]} />);
 
     const [props] = (BarChart as jest.Mock).mock.calls[0];
-    expect(props.formatYLabel("14000")).toBe("14.000");
+    expect(props.formatYLabel("14000")).toBe("€14.000");
+    expect(props.yAxisLabelWidth).toBe(56);
+  });
+
+  // The source's x-axis labels render at a skewed angle, which gives each
+  // one much more effective length to read without truncating - confirmed
+  // against the source screenshot. Abbreviating the label text (a separate,
+  // already-applied fix) helps, but doesn't replace this.
+  it("rotates the x-axis labels, matching the source's skewed look", () => {
+    (useColorScheme as jest.Mock).mockReturnValue("dark");
+
+    render(<FinancialChart labels={["Jan"]} turnover={[1000]} expenses={[400]} />);
+
+    const [props] = (BarChart as jest.Mock).mock.calls[0];
+    expect(props.rotateLabel).toBe(true);
   });
 
   it("uses the light-mode equivalents when the device is in light mode", () => {
