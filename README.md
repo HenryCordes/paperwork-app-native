@@ -53,6 +53,30 @@ npx expo run:ios
 
 # Android (requires development build)
 npx expo run:android
+
+# Build and install on device (requires cable connection)
+npx expo run:ios --device
+
+# Or build for simulator first, then install on device via Xcode
+npx expo run:ios
+# Then open ios/paperworkappnative.xcworkspace in Xcode and select your device
+
+# Build and install on connected device
+npx expo run:android --device
+
+# Or via ADB after building
+npx expo run:android
+adb install android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+## Fix port already in use
+
+```bash
+# Kill process on port 8081
+lsof -ti:8081 | xargs kill -9
+
+# Then try again
+npx expo run:ios
 ```
 
 See the [Expo documentation](https://docs.expo.dev/develop/development-builds/introduction/) for setting up development builds.
