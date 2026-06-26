@@ -1,4 +1,4 @@
-import { useLayoutEffect } from "react";
+import { useLayoutEffect, useState } from "react";
 import { Alert, Linking, Pressable, StyleSheet, Text, View, useColorScheme } from "react-native";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -19,6 +19,16 @@ export default function ExpenseDetails() {
   const { data, isLoading, isError, error } = useExpenseById(id);
   const expense = data?.data;
   const deleteMutation = useDeleteExpense();
+  const [openDocumentError, setOpenDocumentError] = useState<string | null>(null);
+
+  const handleOpenDocument = async (filePath: string) => {
+    try {
+      setOpenDocumentError(null);
+      await Linking.openURL(documentsService.getDocumentUrl(filePath));
+    } catch {
+      setOpenDocumentError("Kan de bon niet openen");
+    }
+  };
 
   const handleDeletePress = () => {
     Alert.alert(
@@ -98,13 +108,15 @@ export default function ExpenseDetails() {
           </Card>
 
           {expense.expenseFile ? (
-            <Pressable
-              onPress={() => Linking.openURL(documentsService.getDocumentUrl(expense.expenseFile!))}
-            >
+            <Pressable onPress={() => handleOpenDocument(expense.expenseFile!)}>
               <Card style={styles.card}>
                 <Text style={{ color: colors.primary }}>Bon bekijken</Text>
               </Card>
             </Pressable>
+          ) : null}
+
+          {openDocumentError ? (
+            <Text style={[styles.message, { color: colors.danger }]}>{openDocumentError}</Text>
           ) : null}
         </>
       ) : null}

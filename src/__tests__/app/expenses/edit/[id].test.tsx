@@ -245,5 +245,76 @@ describe("Expense Edit/Create screen", () => {
         expect.anything(),
       );
     });
+
+    it("shows a Dutch error and re-enables save when the upload fails", async () => {
+      const scan = jest.fn().mockResolvedValue({
+        imageUri: "file:///tmp/bon.jpg",
+        receiptInfo: { date: new Date("2026-01-20"), total: 50, taxLow: 0, taxHigh: 8.68 },
+      });
+      mockScan({ scan });
+      (documentsService.uploadReceiptDocument as jest.Mock).mockRejectedValue(
+        new Error("network down"),
+      );
+
+      const { getByTestId, findByText } = render(<ExpenseEdit />);
+      fireEvent.press(getByTestId("scan-button"));
+      await waitFor(() => expect(getByTestId("expense-price-input").props.value).toBe("50"));
+
+      fireEvent.press(getByTestId("expense-save-button"));
+
+      expect(await findByText("network down")).toBeTruthy();
+      expect(mutate).not.toHaveBeenCalled();
+      expect(getByTestId("expense-save-button").props.accessibilityState?.disabled).toBeFalsy();
+    });
+  });
+
+  describe("save failure", () => {
+    beforeEach(() => {
+      (useLocalSearchParams as jest.Mock).mockReturnValue({ id: "create" });
+      mockExpenseById({});
+    });
+
+    it("shows a Dutch error and re-enables save when the mutation fails", async () => {
+      (useCreateOrUpdateExpense as jest.Mock).mockReturnValue({
+        mutate: (_data: unknown, { onError }: { onError: (error: Error) => void }) =>
+          onError(new Error("Fout bij aanmaken kosten")),
+        isPending: false,
+      });
+
+      const { getByTestId, findByText } = render(<ExpenseEdit />);
+      fireEvent.press(getByTestId("expense-save-button"));
+
+      expect(await findByText("Fout bij aanmaken kosten")).toBeTruthy();
+      expect(mockBack).not.toHaveBeenCalled();
+      expect(getByTestId("expense-save-button").props.accessibilityState?.disabled).toBeFalsy();
+    });
+
+    it("disables save for the duration of a slow upload, before the mutation is even called", async () => {
+      let resolveUpload: (path: string) => void = () => {};
+      (documentsService.uploadReceiptDocument as jest.Mock).mockReturnValue(
+        new Promise((resolve) => {
+          resolveUpload = resolve;
+        }),
+      );
+      mockScan({
+        scan: jest.fn().mockResolvedValue({
+          imageUri: "file:///tmp/bon.jpg",
+          receiptInfo: { date: new Date("2026-01-20"), total: 50, taxLow: 0, taxHigh: 8.68 },
+        }),
+      });
+
+      const { getByTestId } = render(<ExpenseEdit />);
+      fireEvent.press(getByTestId("scan-button"));
+      await waitFor(() => expect(getByTestId("expense-price-input").props.value).toBe("50"));
+
+      fireEvent.press(getByTestId("expense-save-button"));
+      expect(getByTestId("expense-save-button").props.accessibilityState?.disabled).toBeTruthy();
+
+      fireEvent.press(getByTestId("expense-save-button"));
+      expect(documentsService.uploadReceiptDocument).toHaveBeenCalledTimes(1);
+
+      resolveUpload("receipts/uploaded.jpg");
+      await waitFor(() => expect(mutate).toHaveBeenCalledTimes(1));
+    });
   });
 });

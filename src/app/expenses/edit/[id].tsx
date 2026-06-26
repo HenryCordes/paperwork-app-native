@@ -50,6 +50,8 @@ export default function ExpenseEdit() {
 
   const [formData, setFormData] = useState<ExpenseCreateUpdateRequest>(defaultExpense);
   const [scannedImage, setScannedImage] = useState<ScannedImage | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const { data: expenseData } = useExpenseById(id);
   const { data: contactsData, isError: isContactsError } = useContactsList();
@@ -119,19 +121,37 @@ export default function ExpenseEdit() {
   };
 
   const handleSave = async () => {
-    let expenseFile = formData.expenseFile;
-    if (scannedImage) {
-      expenseFile = await documentsService.uploadReceiptDocument(scannedImage);
+    if (isSaving) {
+      return;
     }
 
-    createOrUpdateExpense.mutate(
-      {
-        ...formData,
-        expenseFile,
-        ...(id && id !== "create" ? { _id: id } : {}),
-      },
-      { onSuccess: () => router.back() },
-    );
+    setIsSaving(true);
+    setSaveError(null);
+
+    try {
+      let expenseFile = formData.expenseFile;
+      if (scannedImage) {
+        expenseFile = await documentsService.uploadReceiptDocument(scannedImage);
+      }
+
+      createOrUpdateExpense.mutate(
+        {
+          ...formData,
+          expenseFile,
+          ...(id && id !== "create" ? { _id: id } : {}),
+        },
+        {
+          onSuccess: () => router.back(),
+          onError: (error: Error) => {
+            setSaveError(error.message || "Fout bij opslaan van kosten");
+            setIsSaving(false);
+          },
+        },
+      );
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : "Fout bij opslaan van kosten");
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -230,11 +250,13 @@ export default function ExpenseEdit() {
 
       {scanError ? <Text style={[styles.error, { color: colors.danger }]}>{scanError}</Text> : null}
 
+      {saveError ? <Text style={[styles.error, { color: colors.danger }]}>{saveError}</Text> : null}
+
       <Pressable
         testID="expense-save-button"
         style={[styles.button, { backgroundColor: colors.primary }]}
         onPress={handleSave}
-        disabled={createOrUpdateExpense.isPending}
+        disabled={isSaving}
       >
         <Text style={styles.buttonText}>{id !== "create" ? "Opslaan" : "Toevoegen"}</Text>
       </Pressable>

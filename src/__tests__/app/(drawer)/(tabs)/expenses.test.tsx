@@ -1,4 +1,4 @@
-import { fireEvent, render } from "@testing-library/react-native";
+import { fireEvent, render, waitFor } from "@testing-library/react-native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 
@@ -174,6 +174,27 @@ describe("Expenses (Kosten) List screen", () => {
       fireEvent(getByTestId("expenses-list"), "endReached");
 
       expect(expensesService.getExpenses).not.toHaveBeenCalled();
+    });
+
+    it("does not start a second fetch for the same page while the first is still in flight", async () => {
+      mockExpensesList({
+        data: makeListResponse([makeExpense({ _id: "e1" })], { hasNextPage: true }),
+      });
+      let resolveFetch: (value: ExpensesResponse) => void = () => {};
+      (expensesService.getExpenses as jest.Mock).mockReturnValue(
+        new Promise((resolve) => {
+          resolveFetch = resolve;
+        }),
+      );
+
+      const { getByTestId } = renderScreen();
+      fireEvent(getByTestId("expenses-list"), "endReached");
+      fireEvent(getByTestId("expenses-list"), "endReached");
+
+      expect(expensesService.getExpenses).toHaveBeenCalledTimes(1);
+
+      resolveFetch(makeListResponse([makeExpense({ _id: "e2", info: "Taxi" })]));
+      await waitFor(() => expect(expensesService.getExpenses).toHaveBeenCalledTimes(1));
     });
   });
 });

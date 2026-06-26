@@ -1,5 +1,5 @@
-import { fireEvent, render } from "@testing-library/react-native";
-import { Alert } from "react-native";
+import { fireEvent, render, waitFor } from "@testing-library/react-native";
+import { Alert, Linking } from "react-native";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 
 import ExpenseDetails from "@/app/expenses/[id]";
@@ -144,5 +144,17 @@ describe("Expense Details screen", () => {
     const { queryByText } = render(<ExpenseDetails />);
 
     expect(queryByText("Bon bekijken")).toBeNull();
+  });
+
+  it("shows an inline Dutch error when opening the receipt fails", async () => {
+    jest.spyOn(Linking, "openURL").mockRejectedValue(new Error("no handler"));
+    mockExpenseById({
+      data: { success: true, data: makeExpense({ expenseFile: "receipts/abc.jpg" }) },
+    });
+
+    const { getByText, findByText } = render(<ExpenseDetails />);
+    fireEvent.press(getByText("Bon bekijken"));
+
+    expect(await findByText("Kan de bon niet openen")).toBeTruthy();
   });
 });

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   FlatList,
   Pressable,
@@ -48,6 +48,7 @@ export default function Expenses() {
   const [page, setPage] = useState(0);
   const [hasNextPage, setHasNextPage] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const isLoadingMoreRef = useRef(false);
 
   const { data, isLoading, isError, error } = useExpensesList({ offset: 0, limit: LIMIT });
 
@@ -68,18 +69,23 @@ export default function Expenses() {
   };
 
   const loadMore = async () => {
-    if (!hasNextPage) {
+    if (!hasNextPage || isLoadingMoreRef.current) {
       return;
     }
 
-    const nextPage = page + 1;
-    const offset = nextPage * LIMIT;
-    const response = await expensesService.getExpenses({ offset, limit: LIMIT });
+    isLoadingMoreRef.current = true;
+    try {
+      const nextPage = page + 1;
+      const offset = nextPage * LIMIT;
+      const response = await expensesService.getExpenses({ offset, limit: LIMIT });
 
-    setHasNextPage(response.data.hasNextPage);
-    if (response.data.docs.length > 0) {
-      setAllExpenses((current) => [...current, ...response.data.docs]);
-      setPage(nextPage);
+      setHasNextPage(response.data.hasNextPage);
+      if (response.data.docs.length > 0) {
+        setAllExpenses((current) => [...current, ...response.data.docs]);
+        setPage(nextPage);
+      }
+    } finally {
+      isLoadingMoreRef.current = false;
     }
   };
 
