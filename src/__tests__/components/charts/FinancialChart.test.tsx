@@ -1,6 +1,7 @@
 import { render } from "@testing-library/react-native";
 
 import { FinancialChart } from "@/components/charts/FinancialChart";
+import { ChartColors } from "@/constants/chartColors";
 
 describe("FinancialChart", () => {
   // react-native-gifted-charts schedules a real setTimeout (default 800ms,
@@ -28,6 +29,23 @@ describe("FinancialChart", () => {
 
     expect(getByText(/Omzet: €2\.200,00/)).toBeTruthy();
     expect(getByText(/Uitgaven: €900,00/)).toBeTruthy();
+  });
+
+  // The source app's bar chart uses its own distinct chart palette
+  // (ChartColors), not the app's general primary/danger theme colors used
+  // for text - confirmed against a side-by-side screenshot comparison with
+  // the source. The two must not be conflated.
+  it("colors the legend swatches with the chart-specific palette, not the general theme colors", () => {
+    const { getByTestId } = render(
+      <FinancialChart labels={["Jan"]} turnover={[1000]} expenses={[400]} />,
+    );
+
+    expect(getByTestId("legend-swatch-Omzet")).toHaveStyle({
+      backgroundColor: ChartColors.revenue.light,
+    });
+    expect(getByTestId("legend-swatch-Uitgaven")).toHaveStyle({
+      backgroundColor: ChartColors.expenses.light,
+    });
   });
 
   it("shows the Dutch empty-state message when there are no labels", () => {

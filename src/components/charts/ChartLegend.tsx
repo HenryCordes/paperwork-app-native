@@ -17,10 +17,13 @@ export function ChartLegend({ items }: ChartLegendProps) {
   const colors = Colors[scheme === "dark" ? "dark" : "light"];
 
   return (
-    <View style={styles.row}>
+    <View style={styles.list}>
       {items.map((item) => (
         <View key={item.label} style={styles.item}>
-          <View style={[styles.swatch, { backgroundColor: item.color }]} />
+          <View
+            testID={`legend-swatch-${item.label}`}
+            style={[styles.swatch, { backgroundColor: item.color }]}
+          />
           <Text style={{ color: colors.text }}>
             {item.label}: {item.value}
           </Text>
@@ -31,11 +34,8 @@ export function ChartLegend({ items }: ChartLegendProps) {
 }
 
 const styles = StyleSheet.create({
-  row: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "center",
-    gap: Spacing.three,
+  list: {
+    gap: Spacing.one,
   },
   item: {
     flexDirection: "row",

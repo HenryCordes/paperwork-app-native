@@ -5,6 +5,7 @@ import { pairBarData, type BarDataItem } from "./barPairing";
 import { ChartLegend } from "./ChartLegend";
 import { formatCurrency } from "@/utils/currency";
 import { Colors } from "@/constants/theme";
+import { ChartColors } from "@/constants/chartColors";
 
 interface FinancialChartProps {
   labels: string[];
@@ -23,6 +24,7 @@ export function FinancialChart({
 }: FinancialChartProps) {
   const scheme = useColorScheme();
   const colors = Colors[scheme === "dark" ? "dark" : "light"];
+  const chartScheme = scheme === "dark" ? "dark" : "light";
 
   if (labels.length === 0) {
     return (
@@ -33,8 +35,8 @@ export function FinancialChart({
   }
 
   const barData = pairBarData(labels, turnover, expenses, {
-    turnoverColor: colors.primary,
-    expensesColor: colors.danger,
+    turnoverColor: ChartColors.revenue[chartScheme],
+    expensesColor: ChartColors.expenses[chartScheme],
   });
 
   return (
@@ -58,12 +60,12 @@ export function FinancialChart({
       <ChartLegend
         items={[
           {
-            color: colors.primary,
+            color: ChartColors.revenue[chartScheme],
             label: "Omzet",
             value: `€${formatCurrency(sum(turnover))}`,
           },
           {
-            color: colors.danger,
+            color: ChartColors.expenses[chartScheme],
             label: "Uitgaven",
             value: `€${formatCurrency(sum(expenses))}`,
           },
