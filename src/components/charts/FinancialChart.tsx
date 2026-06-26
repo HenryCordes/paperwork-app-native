@@ -1,5 +1,12 @@
+import { useState } from "react";
 import { BarChart } from "react-native-gifted-charts";
-import { StyleSheet, Text, View, useColorScheme } from "react-native";
+import {
+  LayoutChangeEvent,
+  StyleSheet,
+  Text,
+  View,
+  useColorScheme,
+} from "react-native";
 
 import { pairBarData, type BarDataItem } from "./barPairing";
 import { ChartLegend } from "./ChartLegend";
@@ -25,6 +32,11 @@ export function FinancialChart({
   const scheme = useColorScheme();
   const colors = Colors[scheme === "dark" ? "dark" : "light"];
   const chartScheme = scheme === "dark" ? "dark" : "light";
+  const [containerWidth, setContainerWidth] = useState<number | null>(null);
+
+  const handleLayout = (event: LayoutChangeEvent) => {
+    setContainerWidth(event.nativeEvent.layout.width);
+  };
 
   if (labels.length === 0) {
     return (
@@ -41,22 +53,29 @@ export function FinancialChart({
 
   return (
     <View>
-      <BarChart
-        data={barData}
-        formatYLabel={(label: string) => formatCurrency(Number(label))}
-        renderTooltip={(item: BarDataItem) => (
-          <View
-            style={[
-              styles.tooltip,
-              { backgroundColor: colors.backgroundElement },
-            ]}
-          >
-            <Text style={{ color: colors.text }}>
-              {formatCurrency(item.value)}
-            </Text>
-          </View>
-        )}
-      />
+      <View
+        testID="financial-chart-container"
+        onLayout={handleLayout}
+        style={styles.chartContainer}
+      >
+        <BarChart
+          data={barData}
+          {...(containerWidth !== null ? { parentWidth: containerWidth } : {})}
+          formatYLabel={(label: string) => formatCurrency(Number(label))}
+          renderTooltip={(item: BarDataItem) => (
+            <View
+              style={[
+                styles.tooltip,
+                { backgroundColor: colors.backgroundElement },
+              ]}
+            >
+              <Text style={{ color: colors.text }}>
+                {formatCurrency(item.value)}
+              </Text>
+            </View>
+          )}
+        />
+      </View>
       <ChartLegend
         items={[
           {
@@ -78,6 +97,10 @@ export function FinancialChart({
 const styles = StyleSheet.create({
   emptyMessage: {
     textAlign: "center",
+  },
+  chartContainer: {
+    width: "100%",
+    overflow: "hidden",
   },
   tooltip: {
     padding: 4,
