@@ -84,11 +84,7 @@ export default function Expenses() {
   };
 
   const renderExpense = ({ item }: { item: Expense }) => (
-    <Pressable
-      // Cast needed until Task 6 adds src/app/expenses/[id].tsx - typed
-      // routes only know about routes that already exist on disk.
-      onPress={() => router.push(`/expenses/${item._id}` as Href)}
-    >
+    <Pressable onPress={() => router.push(`/expenses/${item._id}`)}>
       <Card style={styles.card}>
         <Text style={[styles.title, { color: colors.text }]}>
           #{item.expenseNumber} - {item.info}

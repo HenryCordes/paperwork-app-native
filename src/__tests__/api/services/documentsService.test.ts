@@ -19,6 +19,26 @@ describe("DocumentsService", () => {
     globalThis.FormData = OriginalFormData;
   });
 
+  describe("getDocumentUrl", () => {
+    it("builds the full document URL from the axios baseURL and the file path", () => {
+      const axios = { defaults: { baseURL: "https://api.example.com/" } };
+      const service = new DocumentsService(axios as never);
+
+      expect(service.getDocumentUrl("receipts/abc123.jpg")).toBe(
+        "https://api.example.com/document/receipts/abc123.jpg",
+      );
+    });
+
+    it("throws when no base URL is configured", () => {
+      const axios = { defaults: { baseURL: undefined } };
+      const service = new DocumentsService(axios as never);
+
+      expect(() => service.getDocumentUrl("receipts/abc123.jpg")).toThrow(
+        "API base URL not configured",
+      );
+    });
+  });
+
   describe("uploadReceiptDocument", () => {
     const file = { uri: "file:///tmp/receipt.jpg", name: "receipt.jpg", type: "image/jpeg" };
 

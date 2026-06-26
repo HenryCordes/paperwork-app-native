@@ -23,6 +23,15 @@ export class DocumentsService {
     this.axios = axios;
   }
 
+  getDocumentUrl(filePath: string): string {
+    const baseUrl = this.axios.defaults.baseURL;
+    if (!baseUrl) {
+      throw new Error("API base URL not configured");
+    }
+
+    return `${baseUrl}document/${filePath}`;
+  }
+
   async uploadReceiptDocument(file: ReceiptFile): Promise<string> {
     try {
       const formData = new FormData();
