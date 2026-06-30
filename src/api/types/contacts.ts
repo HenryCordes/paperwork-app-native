@@ -51,3 +51,29 @@ export interface ContactsResponse {
 export interface ContactsQueryParams {
   offset: number;
 }
+
+export interface ContactCreateUpdateRequest {
+  _id?: string;
+  companyName: string;
+  typeOfContact: string;
+  typeName: string;
+  lastName: string;
+  firstName: string;
+  initials: string;
+  gender?: string;
+  emailAddress: string;
+  phoneNumber?: string;
+  mobilePhoneNumber?: string;
+  street?: string;
+  houseNumber?: string;
+  postalCode?: string;
+  city?: string;
+  country?: string;
+  visitingStreet?: string;
+  visitingHouseNumber?: string;
+  visitingPostalCode?: string;
+  visitingCity?: string;
+  visitingCountry?: string;
+  bankIBAN?: string;
+  bankPersonName?: string;
+}
