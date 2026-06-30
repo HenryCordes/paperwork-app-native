@@ -8,6 +8,8 @@ import {
   useNotificationsList,
   useUnreadCount,
   useMarkAsRead,
+  useMarkAllAsRead,
+  useDeleteNotification,
   useMarkAsReceived,
 } from "@/hooks/useNotifications";
 import notificationsService from "@/api/services/notificationsService";
@@ -155,6 +157,54 @@ describe("useMarkAsRead", () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(notificationsService.markAsRead).toHaveBeenCalledWith("n1", true);
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: QueryKeys.notifications.base });
+  });
+});
+
+describe("useMarkAllAsRead", () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("calls the service with no argument and invalidates the base key", async () => {
+    (notificationsService.markAllAsRead as jest.Mock).mockResolvedValue({
+      success: true,
+      data: {},
+    });
+
+    const { result, client } = renderWithClient(() => useMarkAllAsRead());
+    const invalidateSpy = jest.spyOn(client, "invalidateQueries");
+
+    act(() => {
+      result.current.mutate();
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(notificationsService.markAllAsRead).toHaveBeenCalled();
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: QueryKeys.notifications.base });
+  });
+});
+
+describe("useDeleteNotification", () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("calls the service with the notificationId and invalidates the base key", async () => {
+    (notificationsService.deleteNotification as jest.Mock).mockResolvedValue({
+      success: true,
+      data: {},
+    });
+
+    const { result, client } = renderWithClient(() => useDeleteNotification());
+    const invalidateSpy = jest.spyOn(client, "invalidateQueries");
+
+    act(() => {
+      result.current.mutate("n1");
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(notificationsService.deleteNotification).toHaveBeenCalledWith("n1");
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: QueryKeys.notifications.base });
   });
 });
