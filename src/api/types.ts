@@ -17,3 +17,14 @@ export interface LoginResponse {
   token: string;
   user: User;
 }
+
+export interface UserProfile {
+  _id: string;
+  name: string;
+  companyName: string;
+  email: string;
+  role: string;
+  organization: string;
+  createdAt: string;
+  __v: number;
+}

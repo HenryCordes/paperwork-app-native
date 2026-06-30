@@ -1,4 +1,3 @@
-import Ionicons from "@expo/vector-icons/Ionicons";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
@@ -16,6 +15,7 @@ import QueryKeys from "@/api/queryKeys";
 import expensesService from "@/api/services/expensesService";
 import { Expense } from "@/api/types/expenses";
 import { Card } from "@/components/Card";
+import { Fab } from "@/components/Fab";
 import { Colors, Spacing } from "@/constants/theme";
 import { useExpensesList } from "@/hooks/useExpenses";
 import { formatCurrency } from "@/utils/currency";
@@ -173,16 +173,11 @@ export default function Expenses() {
         />
       )}
 
-      <Pressable
+      <Fab
         testID="expenses-fab"
         accessibilityLabel="Nieuwe kosten toevoegen"
-        style={styles.fabPosition}
         onPress={() => router.push("/expenses/edit/create")}
-      >
-        <Card style={[styles.fab, { backgroundColor: colors.primary }]}>
-          <Ionicons name="add" size={28} color="#ffffff" />
-        </Card>
-      </Pressable>
+      />
     </View>
   );
 }
@@ -216,18 +211,5 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
-  },
-  fabPosition: {
-    position: "absolute",
-    right: Spacing.four,
-    bottom: Spacing.four,
-  },
-  fab: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    padding: 0,
-    alignItems: "center",
-    justifyContent: "center",
   },
 });

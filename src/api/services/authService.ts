@@ -1,6 +1,6 @@
 import { AxiosError, AxiosInstance } from "axios";
 
-import { ApiError, LoginRequest, LoginResponse } from "../types";
+import { ApiError, LoginRequest, LoginResponse, UserProfile } from "../types";
 import axiosInstance from "../axiosInstance";
 import { secureStorage, AUTH_TOKEN_KEY } from "@/services/secureStorage";
 
@@ -38,6 +38,22 @@ export class AuthService {
   async isAuthenticated(): Promise<boolean> {
     const token = await secureStorage.getItem(AUTH_TOKEN_KEY);
     return token !== null;
+  }
+
+  async getProfile(): Promise<UserProfile> {
+    try {
+      const response = await this.axios.get<{
+        success: boolean;
+        data: UserProfile;
+      }>("auth/profile");
+      return response.data.data;
+    } catch (error) {
+      const axiosError = error as AxiosError<ApiError>;
+      const errorMessage =
+        axiosError.response?.data?.message ||
+        "Kon profielgegevens niet ophalen";
+      throw new Error(errorMessage);
+    }
   }
 }
 

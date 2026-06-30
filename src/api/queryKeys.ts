@@ -1,6 +1,8 @@
 import { DashboardStatsRequest } from "./types/dashboard";
 import { ExpensesQueryParams } from "./types/expenses";
+import { InvoicesQueryParams } from "./types/invoices";
 import { NotificationFilter } from "./types/notifications";
+import { TaxPeriodType, TaxSummaryRequest } from "./types/taxes";
 
 const QueryKeys = {
   auth: {
@@ -16,12 +18,31 @@ const QueryKeys = {
   },
   contacts: {
     base: ["contacts"] as const,
-    list: () => [...QueryKeys.contacts.base, "list"] as const,
+    list: (offset?: number) => [...QueryKeys.contacts.base, "list", offset] as const,
+    detail: (id?: string) => [...QueryKeys.contacts.base, "detail", id] as const,
   },
   expenses: {
     base: ["expenses"] as const,
     list: (params: ExpensesQueryParams) => [...QueryKeys.expenses.base, "list", params] as const,
     detail: (id: string) => [...QueryKeys.expenses.base, "detail", id] as const,
+  },
+  invoices: {
+    base: ["invoices"] as const,
+    list: (params: InvoicesQueryParams) => [...QueryKeys.invoices.base, "list", params] as const,
+    detail: (id: string) => [...QueryKeys.invoices.base, "detail", id] as const,
+  },
+  settings: {
+    base: ["settings"] as const,
+    detail: () => [...QueryKeys.settings.base, "detail"] as const,
+    vatPreferences: () => [...QueryKeys.settings.base, "vat-preferences"] as const,
+  },
+  taxes: {
+    base: ["taxes"] as const,
+    periods: () => [...QueryKeys.taxes.base, "periods"] as const,
+    summary: (params: TaxSummaryRequest) =>
+      [...QueryKeys.taxes.base, "summary", params] as const,
+    deadline: (periodType: TaxPeriodType) =>
+      [...QueryKeys.taxes.base, "deadline", periodType] as const,
   },
   notifications: {
     base: ["notifications"] as const,
