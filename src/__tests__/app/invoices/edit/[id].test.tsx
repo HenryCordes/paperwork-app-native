@@ -300,6 +300,12 @@ describe("Invoice Edit/Create screen", () => {
 
       expect(mutate).toHaveBeenCalledWith(
         expect.objectContaining({
+          // Invoice-level totals derived from the lines (3 x 50 = 150),
+          // with the 21% band computed off unit price per the source formula.
+          priceIncludingTax: 150,
+          tax: 10.5,
+          taxLow: 0,
+          taxLowest: 0,
           invoiceLines: expect.arrayContaining([
             expect.objectContaining({
               description: "Design werk",

@@ -31,6 +31,31 @@ function toDateOnly(iso: string): string {
   return iso.split("T")[0];
 }
 
+// Derive invoice-level totals from the lines, mirroring the source app's
+// calculateTotals: priceIncludingTax sums unit-price x quantity, while each
+// tax band sums unit-price x rate (the source intentionally omits quantity
+// from the band math — ported verbatim, not a new behavior).
+function calculateTotals(lines: InvoiceLine[]): Pick<
+  InvoiceCreateUpdateRequest,
+  "priceIncludingTax" | "tax" | "taxLow" | "taxLowest"
+> {
+  const priceIncludingTax = lines.reduce(
+    (sum, line) => sum + Number(line.priceIncludingTax) * Number(line.numberOfItems),
+    0,
+  );
+  const taxLowest = lines
+    .filter((line) => line.taxRate === 6)
+    .reduce((sum, line) => sum + Number(line.priceIncludingTax) * 0.06, 0);
+  const taxLow = lines
+    .filter((line) => line.taxRate === 12)
+    .reduce((sum, line) => sum + Number(line.priceIncludingTax) * 0.12, 0);
+  const tax = lines
+    .filter((line) => line.taxRate === 21)
+    .reduce((sum, line) => sum + Number(line.priceIncludingTax) * 0.21, 0);
+
+  return { priceIncludingTax, tax, taxLow, taxLowest };
+}
+
 const defaultInvoice: Omit<InvoiceCreateUpdateRequest, "_id"> = {
   contactId: "",
   contactName: "",
@@ -162,6 +187,7 @@ export default function InvoiceEdit() {
     const payload: InvoiceCreateUpdateRequest = {
       ...(formData as InvoiceCreateUpdateRequest),
       invoiceLines,
+      ...calculateTotals(invoiceLines),
       ...(isNew ? {} : { _id: id }),
     };
 
