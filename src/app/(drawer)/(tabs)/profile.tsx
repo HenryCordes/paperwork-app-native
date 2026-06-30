@@ -33,6 +33,7 @@ export default function Profile() {
   const navigation = useNavigation();
   const scheme = useColorScheme();
   const colors = Colors[scheme === "dark" ? "dark" : "light"];
+  const fieldStyle = [styles.field, { borderBottomColor: colors.border }];
 
   const { data: profile, isLoading, isError, error } = useProfile();
   const { checkAvailability, isBiometricsEnabled, setBiometricsEnabled } =
@@ -96,7 +97,7 @@ export default function Profile() {
             {profile.name}
           </Text>
 
-          <View style={styles.field}>
+          <View style={fieldStyle}>
             <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>
               Naam
             </Text>
@@ -105,7 +106,7 @@ export default function Profile() {
             </Text>
           </View>
 
-          <View style={styles.field}>
+          <View style={fieldStyle}>
             <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>
               Bedrijf
             </Text>
@@ -114,7 +115,7 @@ export default function Profile() {
             </Text>
           </View>
 
-          <View style={styles.field}>
+          <View style={fieldStyle}>
             <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>
               Email
             </Text>
@@ -123,7 +124,7 @@ export default function Profile() {
             </Text>
           </View>
 
-          <View style={styles.field}>
+          <View style={fieldStyle}>
             <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>
               Rol
             </Text>
@@ -132,7 +133,7 @@ export default function Profile() {
             </Text>
           </View>
 
-          <View style={styles.field}>
+          <View style={fieldStyle}>
             <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>
               Account aangemaakt
             </Text>
@@ -142,7 +143,7 @@ export default function Profile() {
           </View>
 
           {biometricAvailable && biometryType !== BiometricType.NONE && (
-            <View style={styles.field}>
+            <View style={fieldStyle}>
               <View style={styles.toggleRow}>
                 <View style={styles.toggleLabel}>
                   <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>
@@ -188,7 +189,6 @@ const styles = StyleSheet.create({
   field: {
     paddingVertical: Spacing.two,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "#d1d1d6",
   },
   fieldLabel: {
     fontSize: 12,

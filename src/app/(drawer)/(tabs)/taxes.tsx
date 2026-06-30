@@ -237,7 +237,7 @@ export default function Taxes() {
               )}
             </Text>
           </View>
-          <View style={[styles.summaryRow, styles.totalRow]}>
+          <View style={[styles.summaryRow, styles.totalRow, { borderTopColor: colors.border }]}>
             <Text style={[styles.totalLabel, { color: colors.text }]}>Totaal te betalen BTW</Text>
             <Text style={[styles.totalValue, { color: colors.text }]}>
               {new Intl.NumberFormat("nl-NL", { style: "currency", currency: "EUR" }).format(
@@ -309,7 +309,6 @@ const styles = StyleSheet.create({
   },
   totalRow: {
     borderTopWidth: 1,
-    borderTopColor: "#ccc",
     marginTop: Spacing.two,
     paddingTop: Spacing.two,
   },
