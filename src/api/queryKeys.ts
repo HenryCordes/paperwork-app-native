@@ -16,7 +16,7 @@ const QueryKeys = {
   },
   contacts: {
     base: ["contacts"] as const,
-    list: () => [...QueryKeys.contacts.base, "list"] as const,
+    list: (offset?: number) => [...QueryKeys.contacts.base, "list", offset] as const,
   },
   expenses: {
     base: ["expenses"] as const,

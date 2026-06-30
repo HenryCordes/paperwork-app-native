@@ -8,15 +8,24 @@ describe("ContactsService", () => {
   });
 
   describe("getContacts", () => {
-    it("calls the contacts endpoint and returns the resolved data", async () => {
+    it("defaults to offset 0 and returns the resolved data", async () => {
       const response = { success: true, data: { docs: [{ _id: "1", companyName: "Acme" }] } };
       mockAxios.get.mockResolvedValue({ data: response });
       const service = new ContactsService(mockAxios as never);
 
       const result = await service.getContacts();
 
-      expect(mockAxios.get).toHaveBeenCalledWith("contacts");
+      expect(mockAxios.get).toHaveBeenCalledWith("contacts?offset=0");
       expect(result).toEqual(response);
+    });
+
+    it("forwards an explicit offset into the query string", async () => {
+      mockAxios.get.mockResolvedValue({ data: { success: true, data: { docs: [] } } });
+      const service = new ContactsService(mockAxios as never);
+
+      await service.getContacts({ offset: 20 });
+
+      expect(mockAxios.get).toHaveBeenCalledWith("contacts?offset=20");
     });
 
     it("throws the API's error message on failure", async () => {

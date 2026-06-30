@@ -1,7 +1,7 @@
 import { AxiosError, AxiosInstance } from "axios";
 
 import { ApiError } from "../types";
-import { ContactsResponse } from "../types/contacts";
+import { ContactsQueryParams, ContactsResponse } from "../types/contacts";
 import axiosInstance from "../axiosInstance";
 
 export class ContactsService {
@@ -11,9 +11,13 @@ export class ContactsService {
     this.axios = axios;
   }
 
-  async getContacts(): Promise<ContactsResponse> {
+  async getContacts(
+    params: ContactsQueryParams = { offset: 0 },
+  ): Promise<ContactsResponse> {
     try {
-      const response = await this.axios.get<ContactsResponse>("contacts");
+      const response = await this.axios.get<ContactsResponse>(
+        `contacts?offset=${params.offset}`,
+      );
       return response.data;
     } catch (error) {
       const axiosError = error as AxiosError<ApiError>;
