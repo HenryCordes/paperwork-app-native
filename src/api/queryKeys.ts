@@ -1,6 +1,8 @@
 import { DashboardStatsRequest } from "./types/dashboard";
 import { ExpensesQueryParams } from "./types/expenses";
+import { InvoicesQueryParams } from "./types/invoices";
 import { NotificationFilter } from "./types/notifications";
+import { TaxPeriodType, TaxSummaryRequest } from "./types/taxes";
 
 const QueryKeys = {
   auth: {
@@ -24,13 +26,9 @@ const QueryKeys = {
     list: (params: ExpensesQueryParams) => [...QueryKeys.expenses.base, "list", params] as const,
     detail: (id: string) => [...QueryKeys.expenses.base, "detail", id] as const,
   },
-  // Phase 4b stub namespaces: each fan-out section narrows its own `params`
-  // type when it ports its data layer. Left as `unknown` here so this base
-  // file doesn't import not-yet-existing type modules. Profile reuses the
-  // existing QueryKeys.auth.profile() key rather than a separate namespace.
   invoices: {
     base: ["invoices"] as const,
-    list: (params: unknown) => [...QueryKeys.invoices.base, "list", params] as const,
+    list: (params: InvoicesQueryParams) => [...QueryKeys.invoices.base, "list", params] as const,
     detail: (id: string) => [...QueryKeys.invoices.base, "detail", id] as const,
   },
   settings: {
@@ -41,8 +39,10 @@ const QueryKeys = {
   taxes: {
     base: ["taxes"] as const,
     periods: () => [...QueryKeys.taxes.base, "periods"] as const,
-    summary: (params: unknown) => [...QueryKeys.taxes.base, "summary", params] as const,
-    deadline: () => [...QueryKeys.taxes.base, "deadline"] as const,
+    summary: (params: TaxSummaryRequest) =>
+      [...QueryKeys.taxes.base, "summary", params] as const,
+    deadline: (periodType: TaxPeriodType) =>
+      [...QueryKeys.taxes.base, "deadline", periodType] as const,
   },
   notifications: {
     base: ["notifications"] as const,
