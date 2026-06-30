@@ -88,22 +88,23 @@ export default function SettingsEdit() {
     });
   }, [navigation, colors.background, colors.text, colors.primary]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setSaveError(null);
 
-    updateSettings.mutate(formData, {
-      onSuccess: () => router.back(),
-      onError: (error: Error) => {
-        setSaveError(error.message || "Fout bij bijwerken instellingen");
-      },
-    });
-
+    // Run the two independent updates together and only navigate once both
+    // have resolved. Navigating inside one mutation's onSuccess (as before)
+    // could leave the screen on a still-pending or failed VAT update, and
+    // surface that failure via setState on an unmounted component.
+    const tasks: Promise<unknown>[] = [updateSettings.mutateAsync(formData)];
     if (vatData?.data) {
-      updateVatPreferences.mutate(vatFormData, {
-        onError: (error: Error) => {
-          setSaveError(error.message || "Fout bij bijwerken BTW-notificatievoorkeuren");
-        },
-      });
+      tasks.push(updateVatPreferences.mutateAsync(vatFormData));
+    }
+
+    try {
+      await Promise.all(tasks);
+      router.back();
+    } catch (error) {
+      setSaveError((error as Error).message || "Fout bij bijwerken instellingen");
     }
   };
 

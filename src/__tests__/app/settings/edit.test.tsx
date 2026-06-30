@@ -106,9 +106,14 @@ describe("Settings Edit screen", () => {
   beforeEach(() => {
     (useNavigation as jest.Mock).mockReturnValue({ setOptions: mockSetOptions });
     (useRouter as jest.Mock).mockReturnValue({ back: mockBack });
-    (useUpdateSettings as jest.Mock).mockReturnValue({ mutate: mutateSettings, isPending: false });
+    mutateSettings.mockResolvedValue({});
+    mutateVatPrefs.mockResolvedValue({});
+    (useUpdateSettings as jest.Mock).mockReturnValue({
+      mutateAsync: mutateSettings,
+      isPending: false,
+    });
     (useUpdateVatPreferences as jest.Mock).mockReturnValue({
-      mutate: mutateVatPrefs,
+      mutateAsync: mutateVatPrefs,
       isPending: false,
     });
     mockSettingsHook();
@@ -153,7 +158,6 @@ describe("Settings Edit screen", () => {
 
     expect(mutateSettings).toHaveBeenCalledWith(
       expect.objectContaining({ companyName: "Nieuwe Naam BV" }),
-      expect.anything(),
     );
   });
 
@@ -168,7 +172,6 @@ describe("Settings Edit screen", () => {
 
     expect(mutateVatPrefs).toHaveBeenCalledWith(
       expect.objectContaining({ pushNotifications: true }),
-      expect.anything(),
     );
   });
 
@@ -176,11 +179,7 @@ describe("Settings Edit screen", () => {
     mockSettingsHook({ data: makeSettingsResponse() });
     mockVatPreferencesHook({});
 
-    (useUpdateSettings as jest.Mock).mockReturnValue({
-      mutate: (_data: unknown, { onError }: { onError: (e: Error) => void }) =>
-        onError(new Error("Fout bij bijwerken instellingen")),
-      isPending: false,
-    });
+    mutateSettings.mockRejectedValue(new Error("Fout bij bijwerken instellingen"));
 
     const { getByTestId, findByText } = render(<SettingsEdit />);
     fireEvent.press(getByTestId("settings-save-button"));
@@ -193,15 +192,26 @@ describe("Settings Edit screen", () => {
     mockSettingsHook({ data: makeSettingsResponse() });
     mockVatPreferencesHook({});
 
-    (useUpdateSettings as jest.Mock).mockReturnValue({
-      mutate: (_data: unknown, { onSuccess }: { onSuccess: () => void }) => onSuccess(),
-      isPending: false,
-    });
-
     const { getByTestId } = render(<SettingsEdit />);
     fireEvent.press(getByTestId("settings-save-button"));
 
     await waitFor(() => expect(mockBack).toHaveBeenCalled());
+  });
+
+  it("does not navigate back when the VAT update fails", async () => {
+    mockSettingsHook({ data: makeSettingsResponse() });
+    mockVatPreferencesHook({ data: makeVatPreferencesResponse() });
+    mutateVatPrefs.mockRejectedValue(
+      new Error("Fout bij bijwerken BTW-notificatievoorkeuren"),
+    );
+
+    const { getByTestId, findByText } = render(<SettingsEdit />);
+    fireEvent.press(getByTestId("settings-save-button"));
+
+    expect(
+      await findByText("Fout bij bijwerken BTW-notificatievoorkeuren"),
+    ).toBeTruthy();
+    expect(mockBack).not.toHaveBeenCalled();
   });
 
   it("themes the native header", () => {
