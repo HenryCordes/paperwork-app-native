@@ -47,7 +47,16 @@
         }
       ],
       "@react-native-firebase/app",
-      "expo-notifications"
+      "expo-notifications",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useFrameworks": "static",
+            "forceStaticLinking": ["RNFBApp", "RNFBMessaging"]
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
