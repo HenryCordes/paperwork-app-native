@@ -9,7 +9,8 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon",
-      "bundleIdentifier": "com.anonymous.paperworkappnative"
+      "bundleIdentifier": "nl.paperwork.app",
+      "googleServicesFile": "./GoogleService-Info.plist"
     },
     "android": {
       "adaptiveIcon": {
@@ -19,7 +20,8 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.paperworkappnative"
+      "package": "nl.paperwork.app",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "output": "static",
@@ -43,7 +45,9 @@
         {
           "cameraPermission": "Paperwork heeft toegang tot je camera nodig om bonnen te kunnen scannen."
         }
-      ]
+      ],
+      "@react-native-firebase/app",
+      "expo-notifications"
     ],
     "experiments": {
       "typedRoutes": true,
