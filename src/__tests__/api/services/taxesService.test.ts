@@ -146,9 +146,9 @@ describe("TaxesService", () => {
         params,
         responseType: "arraybuffer",
       });
-      // Result should be a valid base64 string
-      expect(typeof result).toBe("string");
-      expect(result.length).toBeGreaterThan(0);
+      // Exact base64 of the "Hell" bytes — guards the manual byte->base64
+      // encoding against off-by-one / mis-encode regressions.
+      expect(result).toBe("SGVsbA==");
     });
 
     it("throws a Dutch fallback message on failure", async () => {
