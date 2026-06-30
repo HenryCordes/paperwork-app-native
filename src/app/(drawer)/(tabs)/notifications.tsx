@@ -58,7 +58,7 @@ export default function Notifications() {
   };
 
   const handleMarkAsRead = (notification: StoredNotification) => {
-    markAsRead.mutate({ notificationId: notification._id, read: true });
+    markAsRead.mutate({ notificationId: notification._id, read: !notification.read });
   };
 
   const handleDelete = (notification: StoredNotification) => {

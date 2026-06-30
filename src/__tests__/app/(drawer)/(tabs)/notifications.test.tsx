@@ -125,6 +125,19 @@ describe("Notifications List screen", () => {
     expect(mockMarkAsReadMutate).toHaveBeenCalledWith({ notificationId: "n42", read: true });
   });
 
+  it("toggles a read notification back to unread when its action is pressed", () => {
+    const notification = makeNotification({ _id: "n43", read: true });
+    mockNotificationsList({
+      data: { success: true, data: [notification] },
+    });
+
+    const { getByTestId } = renderScreen();
+
+    fireEvent.press(getByTestId("notification-mark-read-n43"));
+
+    expect(mockMarkAsReadMutate).toHaveBeenCalledWith({ notificationId: "n43", read: false });
+  });
+
   it("calls useDeleteNotification().mutate with the id when the delete action is pressed", () => {
     const notification = makeNotification({ _id: "n99", read: false });
     mockNotificationsList({
