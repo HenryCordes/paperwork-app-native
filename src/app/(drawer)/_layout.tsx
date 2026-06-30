@@ -1,4 +1,5 @@
 import { Drawer } from "expo-router/drawer";
+import { useRouter, type Href } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Text, View, StyleSheet, useColorScheme } from "react-native";
 import type { DrawerContentComponentProps } from "expo-router/drawer";
@@ -9,24 +10,33 @@ import { useAuth } from "@/hooks/useAuth";
 
 interface MenuItem {
   label: string;
-  route: string;
+  href: Href;
   icon: keyof typeof Ionicons.glyphMap;
 }
 
+// Hrefs (leading slash), not bare route names: these screens live inside the
+// nested (tabs) navigator, which a bare drawer-level navigate("invoices")
+// cannot resolve. expo-router's router resolves the href to the nested screen.
 const MENU_ITEMS: MenuItem[] = [
-  { label: "Dashboard", route: "dashboard", icon: "stats-chart" },
-  { label: "Kosten", route: "expenses", icon: "wallet-outline" },
-  { label: "Facturen", route: "invoices", icon: "document-text-outline" },
-  { label: "Emails", route: "emails", icon: "mail-outline" },
-  { label: "Contacten", route: "contacts", icon: "people-outline" },
-  { label: "Belasting", route: "taxes", icon: "calculator-outline" },
-  { label: "Notificaties", route: "notifications", icon: "notifications-outline" },
+  { label: "Dashboard", href: "/dashboard", icon: "stats-chart" },
+  { label: "Kosten", href: "/expenses", icon: "wallet-outline" },
+  { label: "Facturen", href: "/invoices", icon: "document-text-outline" },
+  { label: "Emails", href: "/emails", icon: "mail-outline" },
+  { label: "Contacten", href: "/contacts", icon: "people-outline" },
+  { label: "Belasting", href: "/taxes", icon: "calculator-outline" },
+  { label: "Notificaties", href: "/notifications", icon: "notifications-outline" },
 ];
 
-function CustomDrawerContent(props: DrawerContentComponentProps) {
+export function CustomDrawerContent(props: DrawerContentComponentProps) {
   const scheme = useColorScheme();
   const colors = Colors[scheme === "dark" ? "dark" : "light"];
+  const router = useRouter();
   const { logout } = useAuth();
+
+  const go = (href: Href) => {
+    router.navigate(href);
+    props.navigation.closeDrawer();
+  };
 
   return (
     <DrawerContentScrollView
@@ -43,18 +53,18 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
           <Ionicons name="person-circle-outline" size={size} color={colors.text} />
         )}
         labelStyle={{ color: colors.text }}
-        onPress={() => props.navigation.navigate("profile")}
+        onPress={() => go("/profile")}
       />
 
       {MENU_ITEMS.map((item) => (
         <DrawerItem
-          key={item.route}
+          key={item.href as string}
           label={item.label}
           icon={({ size }) => (
             <Ionicons name={item.icon} size={size} color={colors.text} />
           )}
           labelStyle={{ color: colors.text }}
-          onPress={() => props.navigation.navigate(item.route)}
+          onPress={() => go(item.href)}
         />
       ))}
 
