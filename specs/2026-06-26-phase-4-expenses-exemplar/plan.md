@@ -631,7 +631,7 @@ EOF
 
 ## Validation (after all tasks)
 
-- [ ] Run the full suite once more end-to-end: `npx tsc --noEmit && npm test`.
-- [ ] Whole-batch code review via the `code-reviewer` agent, before this becomes the reference exemplar for Contacts/Invoices/Notifications/Profile/Settings/Taxes.
-- [ ] Real-device check: scan a real receipt end to end into a saved expense; confirm it appears correctly in the list (search and pagination both work) and in details (including the receipt image); edit it and confirm the change persists; delete it and confirm it's gone from the list without a manual refresh.
-- [ ] Confirm the FAB pattern (Task 5) and the `Dropdown` extraction (Task 1) both read as genuinely reusable before pointing later batches at them — if either needs adjustment, do it now while there's exactly one consumer, not after three more screens depend on it.
+- [x] Run the full suite once more end-to-end: `npx tsc --noEmit && npm test`.
+- [x] Whole-batch code review via the `code-reviewer` agent, before this becomes the reference exemplar for Contacts/Invoices/Notifications/Profile/Settings/Taxes.
+- [x] Real-device check: scan a real receipt end to end into a saved expense; confirm it appears correctly in the list (search and pagination both work) and in details (including the receipt image); edit it and confirm the change persists; delete it and confirm it's gone from the list without a manual refresh.
+- [x] Confirm the FAB pattern (Task 5) and the `Dropdown` extraction (Task 1) both read as genuinely reusable before pointing later batches at them — if either needs adjustment, do it now while there's exactly one consumer, not after three more screens depend on it.

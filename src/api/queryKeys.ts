@@ -1,5 +1,6 @@
 import { DashboardStatsRequest } from "./types/dashboard";
 import { ExpensesQueryParams } from "./types/expenses";
+import { NotificationFilter } from "./types/notifications";
 
 const QueryKeys = {
   auth: {
@@ -21,6 +22,14 @@ const QueryKeys = {
     base: ["expenses"] as const,
     list: (params: ExpensesQueryParams) => [...QueryKeys.expenses.base, "list", params] as const,
     detail: (id: string) => [...QueryKeys.expenses.base, "detail", id] as const,
+  },
+  notifications: {
+    base: ["notifications"] as const,
+    tokens: () => [...QueryKeys.notifications.base, "tokens"] as const,
+    settings: () => [...QueryKeys.notifications.base, "settings"] as const,
+    list: (filter?: NotificationFilter) =>
+      [...QueryKeys.notifications.base, "list", filter] as const,
+    unreadCount: () => [...QueryKeys.notifications.base, "unread-count"] as const,
   },
 };
 
