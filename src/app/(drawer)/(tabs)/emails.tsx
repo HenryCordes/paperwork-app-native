@@ -13,7 +13,7 @@ import {
 
 import QueryKeys from "@/api/queryKeys";
 import emailsService from "@/api/services/emailsService";
-import { Email } from "@/api/types/emails";
+import type { Email } from "@/api/types/emails";
 import { Card } from "@/components/Card";
 import { Fab } from "@/components/Fab";
 import { Colors, Spacing } from "@/constants/theme";
