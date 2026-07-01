@@ -51,7 +51,16 @@ npx expo start
 # iOS (requires development build)
 npx expo run:ios
 
+# iOS clean rebuild (manual)
+rm -rf ios/Pods ios/build
+cd ios && pod install && cd ..
+npx expo run:ios
+
 # Android (requires development build)
+npx expo run:android
+
+# Android clean rebuild (manual)
+cd android && ./gradlew clean && cd ..
 npx expo run:android
 
 # Build and install on device (requires cable connection)

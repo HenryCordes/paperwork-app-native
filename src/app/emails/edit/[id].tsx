@@ -1,7 +1,7 @@
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   Pressable,
-  ScrollView,
   StyleSheet,
   Switch,
   Text,
@@ -9,19 +9,19 @@ import {
   View,
   useColorScheme,
 } from "react-native";
-import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 
-import {
-  useEmailById,
-  useCreateOrUpdateEmail,
-  useSendEmail,
-} from "@/hooks/useEmails";
-import { useContactsList } from "@/hooks/useContacts";
-import { useInvoicesList } from "@/hooks/useInvoices";
+import type { EmailCreateUpdateRequest } from "@/api/types/emails";
 import { Dropdown } from "@/components/Dropdown";
 import { EmailBodyEditor } from "@/components/EmailBodyEditor";
-import type { EmailCreateUpdateRequest } from "@/api/types/emails";
+import { KeyboardAwareScrollView } from "@/components/KeyboardAwareScrollView";
 import { Colors, Spacing } from "@/constants/theme";
+import { useContactsList } from "@/hooks/useContacts";
+import {
+  useCreateOrUpdateEmail,
+  useEmailById,
+  useSendEmail,
+} from "@/hooks/useEmails";
+import { useInvoicesList } from "@/hooks/useInvoices";
 import { isEmptyHtmlBody } from "@/utils/htmlContent";
 
 function contactLabel(contact: {
@@ -53,6 +53,7 @@ export default function EmailEdit() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const isNew = id === "create";
+  const editorAnchorRef = useRef<View>(null);
 
   const [formData, setFormData] = useState<EmailCreateUpdateRequest>({
     ...defaultEmail,
@@ -145,13 +146,11 @@ export default function EmailEdit() {
       return;
     }
     setSaveError(null);
-    createOrUpdate.mutate(
-      formData,
-      {
-        onSuccess: () => router.back(),
-        onError: (err: Error) => setSaveError(err.message || "Fout bij opslaan van email"),
-      },
-    );
+    createOrUpdate.mutate(formData, {
+      onSuccess: () => router.back(),
+      onError: (err: Error) =>
+        setSaveError(err.message || "Fout bij opslaan van email"),
+    });
   };
 
   const handleSend = () => {
@@ -159,48 +158,63 @@ export default function EmailEdit() {
       return;
     }
     setSaveError(null);
-    sendEmail.mutate(
-      formData,
-      {
-        onSuccess: () => router.back(),
-        onError: (err: Error) => setSaveError(err.message || "Fout bij verzenden van email"),
-      },
-    );
+    sendEmail.mutate(formData, {
+      onSuccess: () => router.back(),
+      onError: (err: Error) =>
+        setSaveError(err.message || "Fout bij verzenden van email"),
+    });
   };
 
   return (
-    <ScrollView
+    <KeyboardAwareScrollView
       testID="email-edit-screen"
       style={{ backgroundColor: colors.background }}
       contentContainerStyle={styles.container}
+      focusAnchorRef={editorAnchorRef}
     >
       <View style={styles.field}>
-        <Text style={[styles.label, { color: colors.textSecondary }]}>Email nummer</Text>
+        <Text style={[styles.label, { color: colors.textSecondary }]}>
+          Email nummer
+        </Text>
         <TextInput
           testID="email-number-input"
-          style={[styles.input, { color: colors.textSecondary, borderColor: colors.textSecondary }]}
+          style={[
+            styles.input,
+            { color: colors.textSecondary, borderColor: colors.textSecondary },
+          ]}
           value={String(formData.emailNumber)}
           editable={false}
         />
       </View>
 
       <View style={styles.field}>
-        <Text style={[styles.label, { color: colors.textSecondary }]}>Onderwerp</Text>
+        <Text style={[styles.label, { color: colors.textSecondary }]}>
+          Onderwerp
+        </Text>
         <TextInput
           testID="email-subject-input"
-          style={[styles.input, { color: colors.text, borderColor: colors.textSecondary }]}
+          style={[
+            styles.input,
+            { color: colors.text, borderColor: colors.textSecondary },
+          ]}
           value={formData.subject}
-          onChangeText={(text) => setFormData((prev) => ({ ...prev, subject: text }))}
+          onChangeText={(text) =>
+            setFormData((prev) => ({ ...prev, subject: text }))
+          }
           placeholder="Onderwerp van de email"
           placeholderTextColor={colors.textSecondary}
         />
         {errors.subject ? (
-          <Text style={[styles.error, { color: colors.danger }]}>{errors.subject}</Text>
+          <Text style={[styles.error, { color: colors.danger }]}>
+            {errors.subject}
+          </Text>
         ) : null}
       </View>
 
       <View style={styles.field}>
-        <Text style={[styles.label, { color: colors.textSecondary }]}>Contactpersoon</Text>
+        <Text style={[styles.label, { color: colors.textSecondary }]}>
+          Contactpersoon
+        </Text>
         <Dropdown
           testID="contact-dropdown"
           label="Contactpersoon"
@@ -214,22 +228,33 @@ export default function EmailEdit() {
           </Text>
         ) : null}
         {errors.contactId ? (
-          <Text style={[styles.error, { color: colors.danger }]}>{errors.contactId}</Text>
+          <Text style={[styles.error, { color: colors.danger }]}>
+            {errors.contactId}
+          </Text>
         ) : null}
       </View>
 
       <View style={styles.field}>
-        <Text style={[styles.label, { color: colors.textSecondary }]}>Datum</Text>
+        <Text style={[styles.label, { color: colors.textSecondary }]}>
+          Datum
+        </Text>
         <TextInput
           testID="email-date-input"
-          style={[styles.input, { color: colors.text, borderColor: colors.textSecondary }]}
+          style={[
+            styles.input,
+            { color: colors.text, borderColor: colors.textSecondary },
+          ]}
           value={formData.emailDate}
-          onChangeText={(text) => setFormData((prev) => ({ ...prev, emailDate: text }))}
+          onChangeText={(text) =>
+            setFormData((prev) => ({ ...prev, emailDate: text }))
+          }
           placeholder="JJJJ-MM-DD"
           placeholderTextColor={colors.textSecondary}
         />
         {errors.emailDate ? (
-          <Text style={[styles.error, { color: colors.danger }]}>{errors.emailDate}</Text>
+          <Text style={[styles.error, { color: colors.danger }]}>
+            {errors.emailDate}
+          </Text>
         ) : null}
       </View>
 
@@ -242,7 +267,9 @@ export default function EmailEdit() {
           label="Gekoppelde factuur"
           value={formData.invoiceId ?? ""}
           options={invoiceOptions}
-          onSelect={(value) => setFormData((prev) => ({ ...prev, invoiceId: value }))}
+          onSelect={(value) =>
+            setFormData((prev) => ({ ...prev, invoiceId: value }))
+          }
         />
       </View>
 
@@ -251,26 +278,35 @@ export default function EmailEdit() {
         <Switch
           testID="email-send-toggle"
           value={formData.send}
-          onValueChange={(value) => setFormData((prev) => ({ ...prev, send: value }))}
+          onValueChange={(value) =>
+            setFormData((prev) => ({ ...prev, send: value }))
+          }
         />
       </View>
 
       <View style={styles.field}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Bericht</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>
+          Bericht
+        </Text>
         {isNew || formData._id ? (
           <EmailBodyEditor
             key={formData._id ?? "new"}
             initialContent={formData.body}
             onChange={(body) => setFormData((prev) => ({ ...prev, body }))}
+            anchorRef={editorAnchorRef}
           />
         ) : null}
         {errors.body ? (
-          <Text style={[styles.error, { color: colors.danger }]}>{errors.body}</Text>
+          <Text style={[styles.error, { color: colors.danger }]}>
+            {errors.body}
+          </Text>
         ) : null}
       </View>
 
       {saveError ? (
-        <Text style={[styles.error, { color: colors.danger }]}>{saveError}</Text>
+        <Text style={[styles.error, { color: colors.danger }]}>
+          {saveError}
+        </Text>
       ) : null}
 
       <Pressable
@@ -287,7 +323,7 @@ export default function EmailEdit() {
       >
         <Text style={styles.buttonText}>Verzenden</Text>
       </Pressable>
-    </ScrollView>
+    </KeyboardAwareScrollView>
   );
 }
 
@@ -303,6 +339,10 @@ const styles = StyleSheet.create({
   sectionTitle: { fontWeight: "600", fontSize: 15 },
   input: { borderBottomWidth: 1, paddingVertical: Spacing.two, fontSize: 16 },
   error: { fontSize: 12 },
-  button: { borderRadius: 8, paddingVertical: Spacing.three, alignItems: "center" },
+  button: {
+    borderRadius: 8,
+    paddingVertical: Spacing.three,
+    alignItems: "center",
+  },
   buttonText: { color: "#ffffff", fontWeight: "600" },
 });

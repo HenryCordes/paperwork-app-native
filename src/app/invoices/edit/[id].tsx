@@ -1,20 +1,20 @@
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { useEffect, useLayoutEffect, useState } from "react";
 import {
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
   useColorScheme,
 } from "react-native";
-import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 
-import { useInvoiceById, useCreateOrUpdateInvoice } from "@/hooks/useInvoices";
-import { useContactsList } from "@/hooks/useContacts";
-import { Dropdown } from "@/components/Dropdown";
 import { InvoiceCreateUpdateRequest, InvoiceLine } from "@/api/types/invoices";
+import { Dropdown } from "@/components/Dropdown";
+import { KeyboardAwareScrollView } from "@/components/KeyboardAwareScrollView";
 import { Colors, Spacing } from "@/constants/theme";
+import { useContactsList } from "@/hooks/useContacts";
+import { useCreateOrUpdateInvoice, useInvoiceById } from "@/hooks/useInvoices";
 
 function newBlankLine(): InvoiceLine {
   return {
@@ -35,12 +35,15 @@ function toDateOnly(iso: string): string {
 // calculateTotals: priceIncludingTax sums unit-price x quantity, while each
 // tax band sums unit-price x rate (the source intentionally omits quantity
 // from the band math — ported verbatim, not a new behavior).
-function calculateTotals(lines: InvoiceLine[]): Pick<
+function calculateTotals(
+  lines: InvoiceLine[],
+): Pick<
   InvoiceCreateUpdateRequest,
   "priceIncludingTax" | "tax" | "taxLow" | "taxLowest"
 > {
   const priceIncludingTax = lines.reduce(
-    (sum, line) => sum + Number(line.priceIncludingTax) * Number(line.numberOfItems),
+    (sum, line) =>
+      sum + Number(line.priceIncludingTax) * Number(line.numberOfItems),
     0,
   );
   const taxLowest = lines
@@ -75,7 +78,8 @@ export default function InvoiceEdit() {
 
   const isNew = id === "create";
 
-  const [formData, setFormData] = useState<Partial<InvoiceCreateUpdateRequest>>(defaultInvoice);
+  const [formData, setFormData] =
+    useState<Partial<InvoiceCreateUpdateRequest>>(defaultInvoice);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
@@ -101,7 +105,9 @@ export default function InvoiceEdit() {
         payDate: invoice.payDate,
         priceIncludingTax: invoice.priceIncludingTax,
         invoiceLines:
-          invoice.invoiceLines.length > 0 ? invoice.invoiceLines : [newBlankLine()],
+          invoice.invoiceLines.length > 0
+            ? invoice.invoiceLines
+            : [newBlankLine()],
         state: invoice.state,
         tax: invoice.tax,
         taxLow: invoice.taxLow,
@@ -154,13 +160,18 @@ export default function InvoiceEdit() {
     });
   };
 
-  const updateLine = (index: number, field: keyof InvoiceLine, value: InvoiceLine[keyof InvoiceLine]) => {
+  const updateLine = (
+    index: number,
+    field: keyof InvoiceLine,
+    value: InvoiceLine[keyof InvoiceLine],
+  ) => {
     setFormData((prev) => {
       const lines = [...(prev.invoiceLines ?? [])];
       lines[index] = { ...lines[index], [field]: value };
       if (field === "numberOfItems" || field === "priceIncludingTax") {
         const line = lines[index];
-        line.totalLinePrice = Number(line.numberOfItems) * Number(line.priceIncludingTax);
+        line.totalLinePrice =
+          Number(line.numberOfItems) * Number(line.priceIncludingTax);
       }
       return { ...prev, invoiceLines: lines };
     });
@@ -177,7 +188,6 @@ export default function InvoiceEdit() {
     // Strip temp IDs from new lines before submission
     const invoiceLines = (formData.invoiceLines ?? []).map((line) => {
       if (line._id && line._id.startsWith("temp-")) {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars -- stripping temp _id before API submission
         const { _id, ...rest } = line;
         return rest as InvoiceLine;
       }
@@ -201,14 +211,16 @@ export default function InvoiceEdit() {
   };
 
   return (
-    <ScrollView
+    <KeyboardAwareScrollView
       testID="invoice-edit-screen"
       style={{ backgroundColor: colors.background }}
       contentContainerStyle={styles.container}
     >
       {/* Contact picker */}
       <View style={styles.field}>
-        <Text style={[styles.label, { color: colors.textSecondary }]}>Klant</Text>
+        <Text style={[styles.label, { color: colors.textSecondary }]}>
+          Klant
+        </Text>
         <Dropdown
           testID="contact-dropdown"
           label="Klant"
@@ -225,12 +237,19 @@ export default function InvoiceEdit() {
 
       {/* Invoice date */}
       <View style={styles.field}>
-        <Text style={[styles.label, { color: colors.textSecondary }]}>Factuurdatum</Text>
+        <Text style={[styles.label, { color: colors.textSecondary }]}>
+          Factuurdatum
+        </Text>
         <TextInput
           testID="invoice-date-input"
-          style={[styles.input, { color: colors.text, borderColor: colors.textSecondary }]}
+          style={[
+            styles.input,
+            { color: colors.text, borderColor: colors.textSecondary },
+          ]}
           value={formData.invoiceDate ?? ""}
-          onChangeText={(text) => setFormData((prev) => ({ ...prev, invoiceDate: text }))}
+          onChangeText={(text) =>
+            setFormData((prev) => ({ ...prev, invoiceDate: text }))
+          }
           placeholder="JJJJ-MM-DD"
           placeholderTextColor={colors.textSecondary}
         />
@@ -238,12 +257,19 @@ export default function InvoiceEdit() {
 
       {/* Pay date */}
       <View style={styles.field}>
-        <Text style={[styles.label, { color: colors.textSecondary }]}>Betaaldatum</Text>
+        <Text style={[styles.label, { color: colors.textSecondary }]}>
+          Betaaldatum
+        </Text>
         <TextInput
           testID="invoice-paydate-input"
-          style={[styles.input, { color: colors.text, borderColor: colors.textSecondary }]}
+          style={[
+            styles.input,
+            { color: colors.text, borderColor: colors.textSecondary },
+          ]}
           value={formData.payDate ?? ""}
-          onChangeText={(text) => setFormData((prev) => ({ ...prev, payDate: text }))}
+          onChangeText={(text) =>
+            setFormData((prev) => ({ ...prev, payDate: text }))
+          }
           placeholder="JJJJ-MM-DD"
           placeholderTextColor={colors.textSecondary}
         />
@@ -251,7 +277,9 @@ export default function InvoiceEdit() {
 
       {/* Status */}
       <View style={styles.field}>
-        <Text style={[styles.label, { color: colors.textSecondary }]}>Status</Text>
+        <Text style={[styles.label, { color: colors.textSecondary }]}>
+          Status
+        </Text>
         <Dropdown
           testID="state-dropdown"
           label="Status"
@@ -261,13 +289,17 @@ export default function InvoiceEdit() {
             { value: "betaald", label: "Betaald" },
             { value: "te laat", label: "Te laat" },
           ]}
-          onSelect={(value) => setFormData((prev) => ({ ...prev, state: value }))}
+          onSelect={(value) =>
+            setFormData((prev) => ({ ...prev, state: value }))
+          }
         />
       </View>
 
       {/* Invoice lines */}
       <View style={styles.field}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Factuurregels</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>
+          Factuurregels
+        </Text>
 
         {(formData.invoiceLines ?? []).map((line, index) => (
           <View
@@ -300,10 +332,15 @@ export default function InvoiceEdit() {
             </View>
 
             <View style={styles.lineField}>
-              <Text style={[styles.label, { color: colors.textSecondary }]}>Omschrijving</Text>
+              <Text style={[styles.label, { color: colors.textSecondary }]}>
+                Omschrijving
+              </Text>
               <TextInput
                 testID={`line-description-${index}`}
-                style={[styles.input, { color: colors.text, borderColor: colors.textSecondary }]}
+                style={[
+                  styles.input,
+                  { color: colors.text, borderColor: colors.textSecondary },
+                ]}
                 value={line.description}
                 onChangeText={(text) => updateLine(index, "description", text)}
                 placeholder="Omschrijving"
@@ -313,10 +350,15 @@ export default function InvoiceEdit() {
 
             <View style={styles.lineRow}>
               <View style={[styles.lineField, styles.half]}>
-                <Text style={[styles.label, { color: colors.textSecondary }]}>Aantal</Text>
+                <Text style={[styles.label, { color: colors.textSecondary }]}>
+                  Aantal
+                </Text>
                 <TextInput
                   testID={`line-quantity-${index}`}
-                  style={[styles.input, { color: colors.text, borderColor: colors.textSecondary }]}
+                  style={[
+                    styles.input,
+                    { color: colors.text, borderColor: colors.textSecondary },
+                  ]}
                   value={String(line.numberOfItems)}
                   onChangeText={(text) =>
                     updateLine(index, "numberOfItems", parseInt(text, 10) || 0)
@@ -331,10 +373,17 @@ export default function InvoiceEdit() {
                 </Text>
                 <TextInput
                   testID={`line-price-${index}`}
-                  style={[styles.input, { color: colors.text, borderColor: colors.textSecondary }]}
+                  style={[
+                    styles.input,
+                    { color: colors.text, borderColor: colors.textSecondary },
+                  ]}
                   value={String(line.priceIncludingTax)}
                   onChangeText={(text) =>
-                    updateLine(index, "priceIncludingTax", parseFloat(text) || 0)
+                    updateLine(
+                      index,
+                      "priceIncludingTax",
+                      parseFloat(text) || 0,
+                    )
                   }
                   keyboardType="decimal-pad"
                 />
@@ -342,7 +391,9 @@ export default function InvoiceEdit() {
             </View>
 
             <View style={styles.lineField}>
-              <Text style={[styles.label, { color: colors.textSecondary }]}>BTW %</Text>
+              <Text style={[styles.label, { color: colors.textSecondary }]}>
+                BTW %
+              </Text>
               <Dropdown
                 testID={`line-tax-${index}`}
                 label="BTW"
@@ -353,7 +404,9 @@ export default function InvoiceEdit() {
                   { value: "9", label: "9%" },
                   { value: "21", label: "21%" },
                 ]}
-                onSelect={(value) => updateLine(index, "taxRate", parseInt(value, 10))}
+                onSelect={(value) =>
+                  updateLine(index, "taxRate", parseInt(value, 10))
+                }
               />
             </View>
           </View>
@@ -369,7 +422,9 @@ export default function InvoiceEdit() {
       </View>
 
       {saveError ? (
-        <Text style={[styles.error, { color: colors.danger }]}>{saveError}</Text>
+        <Text style={[styles.error, { color: colors.danger }]}>
+          {saveError}
+        </Text>
       ) : null}
 
       <Pressable
@@ -378,9 +433,11 @@ export default function InvoiceEdit() {
         onPress={handleSave}
         disabled={isSaving}
       >
-        <Text style={styles.buttonText}>{!isNew ? "Opslaan" : "Toevoegen"}</Text>
+        <Text style={styles.buttonText}>
+          {!isNew ? "Opslaan" : "Toevoegen"}
+        </Text>
       </Pressable>
-    </ScrollView>
+    </KeyboardAwareScrollView>
   );
 }
 
