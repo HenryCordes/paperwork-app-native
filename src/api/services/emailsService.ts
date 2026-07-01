@@ -60,7 +60,7 @@ export class EmailsService {
 
   async deleteEmail(id: string): Promise<{ success: boolean }> {
     try {
-      await this.axios.delete(`/email/${id}`);
+      await this.axios.delete(`email/${id}`);
       return { success: true };
     } catch (error) {
       const axiosError = error as AxiosError<ApiError>;
@@ -72,7 +72,7 @@ export class EmailsService {
 
   async sendEmail(data: EmailCreateUpdateRequest): Promise<EmailDetailResponse> {
     try {
-      const response = await this.axios.post<EmailDetailResponse>("/email/send", data);
+      const response = await this.axios.post<EmailDetailResponse>("email/send", data);
       return response.data;
     } catch (error) {
       const axiosError = error as AxiosError<ApiError>;

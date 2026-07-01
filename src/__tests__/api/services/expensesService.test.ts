@@ -134,7 +134,7 @@ describe("ExpensesService", () => {
 
       const result = await service.deleteExpense("e1");
 
-      expect(mockAxios.delete).toHaveBeenCalledWith("/expense/e1");
+      expect(mockAxios.delete).toHaveBeenCalledWith("expense/e1");
       expect(result).toEqual({ success: true });
     });
 

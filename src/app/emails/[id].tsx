@@ -15,7 +15,7 @@ import { useEmailById, useDeleteEmail, useSendEmail } from "@/hooks/useEmails";
 import { Card } from "@/components/Card";
 import { EmailBodyViewer } from "@/components/EmailBodyViewer";
 import { Colors, Spacing } from "@/constants/theme";
-import { EmailCreateUpdateRequest } from "@/api/types/emails";
+import type { EmailCreateUpdateRequest } from "@/api/types/emails";
 
 export default function EmailDetails() {
   const scheme = useColorScheme();

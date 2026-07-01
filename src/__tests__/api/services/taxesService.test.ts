@@ -37,7 +37,7 @@ describe("TaxesService", () => {
 
       const result = await service.getTaxPeriods();
 
-      expect(mockAxios.get).toHaveBeenCalledWith("/btw-export/periods");
+      expect(mockAxios.get).toHaveBeenCalledWith("btw-export/periods");
       expect(result).toEqual(response);
     });
 
@@ -66,7 +66,7 @@ describe("TaxesService", () => {
 
       const result = await service.getTaxSummary(params);
 
-      expect(mockAxios.get).toHaveBeenCalledWith("/btw-export/summary", { params });
+      expect(mockAxios.get).toHaveBeenCalledWith("btw-export/summary", { params });
       expect(result).toEqual(response);
     });
 
@@ -106,7 +106,7 @@ describe("TaxesService", () => {
 
       const result = await service.getNextDeadline("quarterly");
 
-      expect(mockAxios.get).toHaveBeenCalledWith("/btw-export/deadline", {
+      expect(mockAxios.get).toHaveBeenCalledWith("btw-export/deadline", {
         params: { periodType: "quarterly" },
       });
       expect(result).toEqual(response);
@@ -118,7 +118,7 @@ describe("TaxesService", () => {
 
       await service.getNextDeadline();
 
-      expect(mockAxios.get).toHaveBeenCalledWith("/btw-export/deadline", {
+      expect(mockAxios.get).toHaveBeenCalledWith("btw-export/deadline", {
         params: { periodType: "quarterly" },
       });
     });
@@ -142,7 +142,7 @@ describe("TaxesService", () => {
 
       const result = await service.exportTaxReturn(params);
 
-      expect(mockAxios.get).toHaveBeenCalledWith("/btw-export/export", {
+      expect(mockAxios.get).toHaveBeenCalledWith("btw-export/export", {
         params,
         responseType: "arraybuffer",
       });

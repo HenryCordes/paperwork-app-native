@@ -16,7 +16,7 @@ describe("VatNotificationPreferencesService", () => {
 
       const result = await service.getPreferences();
 
-      expect(mockAxios.get).toHaveBeenCalledWith("/vat-return-notifications/preferences");
+      expect(mockAxios.get).toHaveBeenCalledWith("vat-return-notifications/preferences");
       expect(result).toEqual(response);
     });
 
@@ -39,7 +39,7 @@ describe("VatNotificationPreferencesService", () => {
 
       const result = await service.updatePreferences(update);
 
-      expect(mockAxios.put).toHaveBeenCalledWith("/vat-return-notifications/preferences", update);
+      expect(mockAxios.put).toHaveBeenCalledWith("vat-return-notifications/preferences", update);
       expect(result).toEqual(response);
     });
 

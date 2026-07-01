@@ -61,6 +61,13 @@ The Details screen renders the stored HTML `body` with tentap's `RichText` in
 WebView. Reusing the editor's own rendering engine gives WYSIWYG parity between
 compose and view and adds no dependency beyond tentap itself.
 
+Note that the read-only viewer is a **sanitizing** renderer, not a passthrough:
+tentap parses the stored HTML into the TipTap schema, so any markup outside the
+configured bridge set (scripts, event handlers, iframes, and the descoped
+alignment/tables) is dropped on both compose and view. Keep it that way — do not
+replace it with a raw `WebView source={{ html }}`, which would render stored
+HTML unsanitized.
+
 ### Data layer: 1:1 port, native conventions
 
 Types are framework-agnostic and copied verbatim. Service is class-based

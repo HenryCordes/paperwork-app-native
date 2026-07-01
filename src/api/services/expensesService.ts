@@ -57,7 +57,7 @@ export class ExpensesService {
 
   async deleteExpense(id: string): Promise<{ success: boolean }> {
     try {
-      await this.axios.delete(`/expense/${id}`);
+      await this.axios.delete(`expense/${id}`);
       return { success: true };
     } catch (error) {
       const axiosError = error as AxiosError<ApiError>;

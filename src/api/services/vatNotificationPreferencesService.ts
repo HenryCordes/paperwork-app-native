@@ -17,7 +17,7 @@ export class VatNotificationPreferencesService {
   async getPreferences(): Promise<VatNotificationPreferencesResponse> {
     try {
       const response = await this.axios.get<VatNotificationPreferencesResponse>(
-        "/vat-return-notifications/preferences",
+        "vat-return-notifications/preferences",
       );
       return response.data;
     } catch (error) {
@@ -33,7 +33,7 @@ export class VatNotificationPreferencesService {
   ): Promise<VatNotificationPreferencesResponse> {
     try {
       const response = await this.axios.put<VatNotificationPreferencesResponse>(
-        "/vat-return-notifications/preferences",
+        "vat-return-notifications/preferences",
         data,
       );
       return response.data;
