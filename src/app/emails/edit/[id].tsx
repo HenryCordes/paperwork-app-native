@@ -20,8 +20,9 @@ import { useContactsList } from "@/hooks/useContacts";
 import { useInvoicesList } from "@/hooks/useInvoices";
 import { Dropdown } from "@/components/Dropdown";
 import { EmailBodyEditor } from "@/components/EmailBodyEditor";
-import { EmailCreateUpdateRequest } from "@/api/types/emails";
+import type { EmailCreateUpdateRequest } from "@/api/types/emails";
 import { Colors, Spacing } from "@/constants/theme";
+import { isEmptyHtmlBody } from "@/utils/htmlContent";
 
 function contactLabel(contact: {
   typeName: string;
@@ -134,7 +135,7 @@ export default function EmailEdit() {
     if (!formData.subject.trim()) next.subject = "Onderwerp is verplicht";
     if (!formData.contactId) next.contactId = "Contactpersoon is verplicht";
     if (!formData.emailDate) next.emailDate = "Datum is verplicht";
-    if (!formData.body.trim()) next.body = "Email inhoud is verplicht";
+    if (isEmptyHtmlBody(formData.body)) next.body = "Email inhoud is verplicht";
     setErrors(next);
     return Object.keys(next).length === 0;
   };
