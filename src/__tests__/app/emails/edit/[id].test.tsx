@@ -15,8 +15,16 @@ jest.mock("expo-router", () => ({
 jest.mock("@/hooks/useEmails");
 jest.mock("@/hooks/useContacts");
 jest.mock("@/hooks/useInvoices");
+let lastEditorInitialContent: string | undefined;
 jest.mock("@/components/EmailBodyEditor", () => ({
-  EmailBodyEditor: ({ onChange }: { onChange: (html: string) => void }) => {
+  EmailBodyEditor: ({
+    initialContent,
+    onChange,
+  }: {
+    initialContent: string;
+    onChange: (html: string) => void;
+  }) => {
+    lastEditorInitialContent = initialContent;
     const { Pressable, Text } = require("react-native");
     return (
       <Pressable testID="mock-editor" onPress={() => onChange("<p>Body</p>")}>
@@ -36,6 +44,7 @@ function renderScreen() {
 
 beforeEach(() => {
   mockId = "create";
+  lastEditorInitialContent = undefined;
   (useEmailById as jest.Mock).mockReturnValue({ data: undefined });
   (useContactsList as jest.Mock).mockReturnValue({
     data: { data: { docs: [
@@ -78,6 +87,43 @@ it("saves a valid new email with the editor's HTML body", async () => {
   await waitFor(() =>
     expect(mutate).toHaveBeenCalledWith(
       expect.objectContaining({ subject: "Offerte", body: "<p>Body</p>", contactId: "c1" }),
+      expect.anything(),
+    ),
+  );
+});
+
+it("mounts the editor with the loaded body in edit mode and does not blank it on save", async () => {
+  mockId = "email-42";
+  const mutate = jest.fn();
+  (useCreateOrUpdateEmail as jest.Mock).mockReturnValue({ mutate });
+  (useEmailById as jest.Mock).mockReturnValue({
+    data: {
+      data: {
+        _id: "email-42",
+        send: false,
+        emailDate: "2026-01-15",
+        subject: "Bestaande email",
+        body: "<p>Original</p>",
+        invoiceId: "",
+        contactId: "c1",
+        contactName: "Acme BV",
+        contactEmail: "a@b.nl",
+        emailNumber: 1234,
+      },
+    },
+  });
+
+  const { getByTestId } = renderScreen();
+
+  // Wait for hydration: the editor should appear once formData._id is set
+  await waitFor(() => expect(lastEditorInitialContent).toBe("<p>Original</p>"));
+
+  // Press save without touching the editor — body must NOT be blanked
+  fireEvent.press(getByTestId("email-save-button"));
+
+  await waitFor(() =>
+    expect(mutate).toHaveBeenCalledWith(
+      expect.objectContaining({ _id: "email-42", body: "<p>Original</p>" }),
       expect.anything(),
     ),
   );

@@ -145,7 +145,7 @@ export default function EmailEdit() {
     }
     setSaveError(null);
     createOrUpdate.mutate(
-      { ...formData, ...(isNew ? {} : { _id: id }) },
+      formData,
       {
         onSuccess: () => router.back(),
         onError: (err: Error) => setSaveError(err.message || "Fout bij opslaan van email"),
@@ -159,7 +159,7 @@ export default function EmailEdit() {
     }
     setSaveError(null);
     sendEmail.mutate(
-      { ...formData, ...(isNew ? {} : { _id: id }) },
+      formData,
       {
         onSuccess: () => router.back(),
         onError: (err: Error) => setSaveError(err.message || "Fout bij verzenden van email"),
@@ -256,10 +256,13 @@ export default function EmailEdit() {
 
       <View style={styles.field}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>Bericht</Text>
-        <EmailBodyEditor
-          initialContent={formData.body}
-          onChange={(body) => setFormData((prev) => ({ ...prev, body }))}
-        />
+        {isNew || formData._id ? (
+          <EmailBodyEditor
+            key={formData._id ?? "new"}
+            initialContent={formData.body}
+            onChange={(body) => setFormData((prev) => ({ ...prev, body }))}
+          />
+        ) : null}
         {errors.body ? (
           <Text style={[styles.error, { color: colors.danger }]}>{errors.body}</Text>
         ) : null}
