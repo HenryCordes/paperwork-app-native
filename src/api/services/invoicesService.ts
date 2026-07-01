@@ -22,7 +22,7 @@ export class InvoicesService {
     try {
       const { offset = 0, limit = 10 } = params;
       const response = await this.axios.get<InvoicesResponse>(
-        `/invoices?offset=${offset}&limit=${limit}`,
+        `invoices?offset=${offset}&limit=${limit}`,
       );
       return response.data;
     } catch (error) {
@@ -37,7 +37,7 @@ export class InvoicesService {
     }
 
     try {
-      const response = await this.axios.get<InvoiceDetailResponse>(`/invoice/${id}`);
+      const response = await this.axios.get<InvoiceDetailResponse>(`invoice/${id}`);
       return response.data;
     } catch (error) {
       const axiosError = error as AxiosError<ApiError>;
@@ -49,7 +49,7 @@ export class InvoicesService {
     data: InvoiceCreateUpdateRequest,
   ): Promise<InvoiceDetailResponse> {
     try {
-      const response = await this.axios.post<InvoiceDetailResponse>("/invoice", data);
+      const response = await this.axios.post<InvoiceDetailResponse>("invoice", data);
       return response.data;
     } catch (error) {
       const axiosError = error as AxiosError<ApiError>;
@@ -59,7 +59,7 @@ export class InvoicesService {
 
   async deleteInvoice(id: string): Promise<{ success: boolean }> {
     try {
-      await this.axios.delete(`/invoices/${id}`);
+      await this.axios.delete(`invoices/${id}`);
       return { success: true };
     } catch (error) {
       const axiosError = error as AxiosError<ApiError>;

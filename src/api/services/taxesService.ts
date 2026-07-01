@@ -20,7 +20,7 @@ export class TaxesService {
 
   async getTaxPeriods(): Promise<TaxPeriodsResponse> {
     try {
-      const response = await this.axios.get<TaxPeriodsResponse>("/btw-export/periods");
+      const response = await this.axios.get<TaxPeriodsResponse>("btw-export/periods");
       return response.data;
     } catch (error) {
       const axiosError = error as AxiosError<ApiError>;
@@ -32,7 +32,7 @@ export class TaxesService {
 
   async getTaxSummary(params: TaxSummaryRequest): Promise<TaxSummaryResponse> {
     try {
-      const response = await this.axios.get<TaxSummaryResponse>("/btw-export/summary", {
+      const response = await this.axios.get<TaxSummaryResponse>("btw-export/summary", {
         params,
       });
       return response.data;
@@ -48,7 +48,7 @@ export class TaxesService {
     periodType: TaxPeriodType = "quarterly",
   ): Promise<TaxDeadlineResponse> {
     try {
-      const response = await this.axios.get<TaxDeadlineResponse>("/btw-export/deadline", {
+      const response = await this.axios.get<TaxDeadlineResponse>("btw-export/deadline", {
         params: { periodType },
       });
       return response.data;
@@ -62,7 +62,7 @@ export class TaxesService {
 
   async exportTaxReturn(params: TaxExportRequest): Promise<string> {
     try {
-      const response = await this.axios.get<string>("/btw-export/export", {
+      const response = await this.axios.get<string>("btw-export/export", {
         params,
         // On RN, axios returns the body as a string regardless of responseType.
         // The source app requests `responseType: "blob"` (Capacitor/web path)

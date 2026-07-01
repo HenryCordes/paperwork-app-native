@@ -36,7 +36,7 @@ describe("InvoicesService", () => {
       const result = await service.getInvoices();
 
       expect(mockAxios.get).toHaveBeenCalledWith(
-        "/invoices?offset=0&limit=10",
+        "invoices?offset=0&limit=10",
       );
       expect(result).toEqual(response);
     });
@@ -49,7 +49,7 @@ describe("InvoicesService", () => {
       await service.getInvoices({ offset: 20, limit: 5 });
 
       expect(mockAxios.get).toHaveBeenCalledWith(
-        "/invoices?offset=20&limit=5",
+        "invoices?offset=20&limit=5",
       );
     });
 
@@ -87,7 +87,7 @@ describe("InvoicesService", () => {
 
       const result = await service.getInvoiceById("inv1");
 
-      expect(mockAxios.get).toHaveBeenCalledWith("/invoice/inv1");
+      expect(mockAxios.get).toHaveBeenCalledWith("invoice/inv1");
       expect(result).toEqual(response);
     });
 
@@ -110,7 +110,7 @@ describe("InvoicesService", () => {
 
       const result = await service.createOrUpdateInvoice(data);
 
-      expect(mockAxios.post).toHaveBeenCalledWith("/invoice", data);
+      expect(mockAxios.post).toHaveBeenCalledWith("invoice", data);
       expect(result).toEqual(response);
     });
 
@@ -140,7 +140,7 @@ describe("InvoicesService", () => {
 
       const result = await service.deleteInvoice("inv1");
 
-      expect(mockAxios.delete).toHaveBeenCalledWith("/invoices/inv1");
+      expect(mockAxios.delete).toHaveBeenCalledWith("invoices/inv1");
       expect(result).toEqual({ success: true });
     });
 

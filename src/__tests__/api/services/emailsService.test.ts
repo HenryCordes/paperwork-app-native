@@ -99,7 +99,7 @@ describe("EmailsService", () => {
 
       const result = await service.deleteEmail("e1");
 
-      expect(mockAxios.delete).toHaveBeenCalledWith("/email/e1");
+      expect(mockAxios.delete).toHaveBeenCalledWith("email/e1");
       expect(result).toEqual({ success: true });
     });
   });
@@ -113,7 +113,7 @@ describe("EmailsService", () => {
 
       const result = await service.sendEmail(data);
 
-      expect(mockAxios.post).toHaveBeenCalledWith("/email/send", data);
+      expect(mockAxios.post).toHaveBeenCalledWith("email/send", data);
       expect(result).toEqual(response);
     });
 
