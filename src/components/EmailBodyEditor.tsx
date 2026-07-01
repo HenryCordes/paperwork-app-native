@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Modal,
   Pressable,
@@ -34,16 +34,23 @@ export function EmailBodyEditor({ initialContent, onChange }: EmailBodyEditorPro
     initialContent: initialContent || "<p></p>",
   });
 
+  const onChangeRef = useRef(onChange);
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  });
+
   const html = useEditorContent(editor, { type: "html" });
 
   // Push live HTML up to the form. useEditorContent returns undefined until the
   // WebView bundle is ready; ignore that first undefined so we don't clobber
   // the form's initial value.
+  // onChange is stored in a ref to avoid re-firing when the parent re-renders
+  // with a new inline callback reference.
   useEffect(() => {
     if (html !== undefined) {
-      onChange(html);
+      onChangeRef.current(html);
     }
-  }, [html, onChange]);
+  }, [html]);
 
   // Match the source app's dark/light editor surface. injectCSS re-applies on
   // every scheme change (keyed 'theme' so it replaces rather than stacks).
