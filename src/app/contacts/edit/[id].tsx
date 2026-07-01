@@ -1,7 +1,7 @@
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { useEffect, useLayoutEffect, useState } from "react";
 import {
   Pressable,
-  ScrollView,
   StyleSheet,
   Switch,
   Text,
@@ -9,12 +9,12 @@ import {
   useColorScheme,
   View,
 } from "react-native";
-import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 
-import { useContactById, useCreateOrUpdateContact } from "@/hooks/useContacts";
-import { Dropdown } from "@/components/Dropdown";
 import { ContactCreateUpdateRequest } from "@/api/types/contacts";
+import { Dropdown } from "@/components/Dropdown";
+import { KeyboardAwareScrollView } from "@/components/KeyboardAwareScrollView";
 import { Colors, Spacing } from "@/constants/theme";
+import { useContactById, useCreateOrUpdateContact } from "@/hooks/useContacts";
 
 const defaultContact: ContactCreateUpdateRequest = {
   companyName: "",
@@ -57,7 +57,8 @@ export default function ContactEdit() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
 
-  const [formData, setFormData] = useState<ContactCreateUpdateRequest>(defaultContact);
+  const [formData, setFormData] =
+    useState<ContactCreateUpdateRequest>(defaultContact);
   const [sameAddress, setSameAddress] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -75,7 +76,7 @@ export default function ContactEdit() {
 
     if (contactData?.data) {
       const contact = contactData.data;
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- pre-filling form from fetched contact
+
       setFormData({
         companyName: contact.companyName || "",
         typeOfContact: contact.typeOfContact || "Klant",
@@ -121,7 +122,10 @@ export default function ContactEdit() {
     });
   }, [navigation, id, colors.background, colors.text, colors.primary]);
 
-  const handleChange = (field: keyof ContactCreateUpdateRequest, value: string) => {
+  const handleChange = (
+    field: keyof ContactCreateUpdateRequest,
+    value: string,
+  ) => {
     setFormData((prev) => {
       const updated = { ...prev, [field]: value };
 
@@ -162,7 +166,12 @@ export default function ContactEdit() {
     setValidationError(null);
     setSaveError(null);
 
-    if (!formData.firstName || !formData.lastName || !formData.companyName || !formData.emailAddress) {
+    if (
+      !formData.firstName ||
+      !formData.lastName ||
+      !formData.companyName ||
+      !formData.emailAddress
+    ) {
       setValidationError(
         "Vul de verplichte velden in (voornaam, achternaam, bedrijfsnaam en e-mail)",
       );
@@ -183,14 +192,16 @@ export default function ContactEdit() {
   };
 
   return (
-    <ScrollView
+    <KeyboardAwareScrollView
       testID="contact-edit-screen"
       style={{ backgroundColor: colors.background }}
       contentContainerStyle={styles.container}
     >
       {/* Bedrijfsgegevens */}
       <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>Bedrijfsgegevens</Text>
+        <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>
+          Bedrijfsgegevens
+        </Text>
 
         <View style={styles.field}>
           <Text style={[styles.label, { color: colors.textSecondary }]}>
@@ -198,7 +209,10 @@ export default function ContactEdit() {
           </Text>
           <TextInput
             testID="contact-companyName-input"
-            style={[styles.input, { color: colors.text, borderColor: colors.textSecondary }]}
+            style={[
+              styles.input,
+              { color: colors.text, borderColor: colors.textSecondary },
+            ]}
             value={formData.companyName}
             onChangeText={(text) => handleChange("companyName", text)}
             placeholder="Voer bedrijfsnaam in"
@@ -229,7 +243,9 @@ export default function ContactEdit() {
 
       {/* Persoonsgegevens */}
       <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>Persoonsgegevens</Text>
+        <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>
+          Persoonsgegevens
+        </Text>
 
         <View style={styles.field}>
           <Text style={[styles.label, { color: colors.textSecondary }]}>
@@ -237,7 +253,10 @@ export default function ContactEdit() {
           </Text>
           <TextInput
             testID="contact-firstName-input"
-            style={[styles.input, { color: colors.text, borderColor: colors.textSecondary }]}
+            style={[
+              styles.input,
+              { color: colors.text, borderColor: colors.textSecondary },
+            ]}
             value={formData.firstName}
             onChangeText={(text) => handleChange("firstName", text)}
             placeholder="Voer voornaam in"
@@ -251,7 +270,10 @@ export default function ContactEdit() {
           </Text>
           <TextInput
             testID="contact-lastName-input"
-            style={[styles.input, { color: colors.text, borderColor: colors.textSecondary }]}
+            style={[
+              styles.input,
+              { color: colors.text, borderColor: colors.textSecondary },
+            ]}
             value={formData.lastName}
             onChangeText={(text) => handleChange("lastName", text)}
             placeholder="Voer achternaam in"
@@ -260,10 +282,15 @@ export default function ContactEdit() {
         </View>
 
         <View style={styles.field}>
-          <Text style={[styles.label, { color: colors.textSecondary }]}>Initialen</Text>
+          <Text style={[styles.label, { color: colors.textSecondary }]}>
+            Initialen
+          </Text>
           <TextInput
             testID="contact-initials-input"
-            style={[styles.input, { color: colors.text, borderColor: colors.textSecondary }]}
+            style={[
+              styles.input,
+              { color: colors.text, borderColor: colors.textSecondary },
+            ]}
             value={formData.initials}
             onChangeText={(text) => handleChange("initials", text)}
             placeholder="Bijv. J.D."
@@ -274,7 +301,9 @@ export default function ContactEdit() {
 
       {/* Contactgegevens */}
       <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>Contactgegevens</Text>
+        <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>
+          Contactgegevens
+        </Text>
 
         <View style={styles.field}>
           <Text style={[styles.label, { color: colors.textSecondary }]}>
@@ -282,7 +311,10 @@ export default function ContactEdit() {
           </Text>
           <TextInput
             testID="contact-emailAddress-input"
-            style={[styles.input, { color: colors.text, borderColor: colors.textSecondary }]}
+            style={[
+              styles.input,
+              { color: colors.text, borderColor: colors.textSecondary },
+            ]}
             value={formData.emailAddress}
             onChangeText={(text) => handleChange("emailAddress", text)}
             placeholder="Voer e-mailadres in"
@@ -293,10 +325,15 @@ export default function ContactEdit() {
         </View>
 
         <View style={styles.field}>
-          <Text style={[styles.label, { color: colors.textSecondary }]}>Telefoonnummer</Text>
+          <Text style={[styles.label, { color: colors.textSecondary }]}>
+            Telefoonnummer
+          </Text>
           <TextInput
             testID="contact-phoneNumber-input"
-            style={[styles.input, { color: colors.text, borderColor: colors.textSecondary }]}
+            style={[
+              styles.input,
+              { color: colors.text, borderColor: colors.textSecondary },
+            ]}
             value={formData.phoneNumber ?? ""}
             onChangeText={(text) => handleChange("phoneNumber", text)}
             placeholder="Voer telefoonnummer in"
@@ -306,10 +343,15 @@ export default function ContactEdit() {
         </View>
 
         <View style={styles.field}>
-          <Text style={[styles.label, { color: colors.textSecondary }]}>Mobiel nummer</Text>
+          <Text style={[styles.label, { color: colors.textSecondary }]}>
+            Mobiel nummer
+          </Text>
           <TextInput
             testID="contact-mobilePhoneNumber-input"
-            style={[styles.input, { color: colors.text, borderColor: colors.textSecondary }]}
+            style={[
+              styles.input,
+              { color: colors.text, borderColor: colors.textSecondary },
+            ]}
             value={formData.mobilePhoneNumber ?? ""}
             onChangeText={(text) => handleChange("mobilePhoneNumber", text)}
             placeholder="Voer mobiel nummer in"
@@ -321,13 +363,20 @@ export default function ContactEdit() {
 
       {/* Postadres */}
       <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>Postadres</Text>
+        <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>
+          Postadres
+        </Text>
 
         <View style={styles.field}>
-          <Text style={[styles.label, { color: colors.textSecondary }]}>Straat</Text>
+          <Text style={[styles.label, { color: colors.textSecondary }]}>
+            Straat
+          </Text>
           <TextInput
             testID="contact-street-input"
-            style={[styles.input, { color: colors.text, borderColor: colors.textSecondary }]}
+            style={[
+              styles.input,
+              { color: colors.text, borderColor: colors.textSecondary },
+            ]}
             value={formData.street ?? ""}
             onChangeText={(text) => handleChange("street", text)}
             placeholder="Voer straatnaam in"
@@ -336,10 +385,15 @@ export default function ContactEdit() {
         </View>
 
         <View style={styles.field}>
-          <Text style={[styles.label, { color: colors.textSecondary }]}>Huisnummer</Text>
+          <Text style={[styles.label, { color: colors.textSecondary }]}>
+            Huisnummer
+          </Text>
           <TextInput
             testID="contact-houseNumber-input"
-            style={[styles.input, { color: colors.text, borderColor: colors.textSecondary }]}
+            style={[
+              styles.input,
+              { color: colors.text, borderColor: colors.textSecondary },
+            ]}
             value={formData.houseNumber ?? ""}
             onChangeText={(text) => handleChange("houseNumber", text)}
             placeholder="Voer huisnummer in"
@@ -348,10 +402,15 @@ export default function ContactEdit() {
         </View>
 
         <View style={styles.field}>
-          <Text style={[styles.label, { color: colors.textSecondary }]}>Postcode</Text>
+          <Text style={[styles.label, { color: colors.textSecondary }]}>
+            Postcode
+          </Text>
           <TextInput
             testID="contact-postalCode-input"
-            style={[styles.input, { color: colors.text, borderColor: colors.textSecondary }]}
+            style={[
+              styles.input,
+              { color: colors.text, borderColor: colors.textSecondary },
+            ]}
             value={formData.postalCode ?? ""}
             onChangeText={(text) => handleChange("postalCode", text)}
             placeholder="Voer postcode in"
@@ -360,10 +419,15 @@ export default function ContactEdit() {
         </View>
 
         <View style={styles.field}>
-          <Text style={[styles.label, { color: colors.textSecondary }]}>Plaats</Text>
+          <Text style={[styles.label, { color: colors.textSecondary }]}>
+            Plaats
+          </Text>
           <TextInput
             testID="contact-city-input"
-            style={[styles.input, { color: colors.text, borderColor: colors.textSecondary }]}
+            style={[
+              styles.input,
+              { color: colors.text, borderColor: colors.textSecondary },
+            ]}
             value={formData.city ?? ""}
             onChangeText={(text) => handleChange("city", text)}
             placeholder="Voer plaats in"
@@ -372,10 +436,15 @@ export default function ContactEdit() {
         </View>
 
         <View style={styles.field}>
-          <Text style={[styles.label, { color: colors.textSecondary }]}>Land</Text>
+          <Text style={[styles.label, { color: colors.textSecondary }]}>
+            Land
+          </Text>
           <TextInput
             testID="contact-country-input"
-            style={[styles.input, { color: colors.text, borderColor: colors.textSecondary }]}
+            style={[
+              styles.input,
+              { color: colors.text, borderColor: colors.textSecondary },
+            ]}
             value={formData.country ?? ""}
             onChangeText={(text) => handleChange("country", text)}
             placeholder="Voer land in"
@@ -398,13 +467,20 @@ export default function ContactEdit() {
       {/* Bezoekadres (only shown when sameAddress is false) */}
       {!sameAddress ? (
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>Bezoekadres</Text>
+          <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>
+            Bezoekadres
+          </Text>
 
           <View style={styles.field}>
-            <Text style={[styles.label, { color: colors.textSecondary }]}>Straat</Text>
+            <Text style={[styles.label, { color: colors.textSecondary }]}>
+              Straat
+            </Text>
             <TextInput
               testID="contact-visitingStreet-input"
-              style={[styles.input, { color: colors.text, borderColor: colors.textSecondary }]}
+              style={[
+                styles.input,
+                { color: colors.text, borderColor: colors.textSecondary },
+              ]}
               value={formData.visitingStreet ?? ""}
               onChangeText={(text) => handleChange("visitingStreet", text)}
               placeholder="Voer straatnaam in"
@@ -413,10 +489,15 @@ export default function ContactEdit() {
           </View>
 
           <View style={styles.field}>
-            <Text style={[styles.label, { color: colors.textSecondary }]}>Huisnummer</Text>
+            <Text style={[styles.label, { color: colors.textSecondary }]}>
+              Huisnummer
+            </Text>
             <TextInput
               testID="contact-visitingHouseNumber-input"
-              style={[styles.input, { color: colors.text, borderColor: colors.textSecondary }]}
+              style={[
+                styles.input,
+                { color: colors.text, borderColor: colors.textSecondary },
+              ]}
               value={formData.visitingHouseNumber ?? ""}
               onChangeText={(text) => handleChange("visitingHouseNumber", text)}
               placeholder="Voer huisnummer in"
@@ -425,10 +506,15 @@ export default function ContactEdit() {
           </View>
 
           <View style={styles.field}>
-            <Text style={[styles.label, { color: colors.textSecondary }]}>Postcode</Text>
+            <Text style={[styles.label, { color: colors.textSecondary }]}>
+              Postcode
+            </Text>
             <TextInput
               testID="contact-visitingPostalCode-input"
-              style={[styles.input, { color: colors.text, borderColor: colors.textSecondary }]}
+              style={[
+                styles.input,
+                { color: colors.text, borderColor: colors.textSecondary },
+              ]}
               value={formData.visitingPostalCode ?? ""}
               onChangeText={(text) => handleChange("visitingPostalCode", text)}
               placeholder="Voer postcode in"
@@ -437,10 +523,15 @@ export default function ContactEdit() {
           </View>
 
           <View style={styles.field}>
-            <Text style={[styles.label, { color: colors.textSecondary }]}>Plaats</Text>
+            <Text style={[styles.label, { color: colors.textSecondary }]}>
+              Plaats
+            </Text>
             <TextInput
               testID="contact-visitingCity-input"
-              style={[styles.input, { color: colors.text, borderColor: colors.textSecondary }]}
+              style={[
+                styles.input,
+                { color: colors.text, borderColor: colors.textSecondary },
+              ]}
               value={formData.visitingCity ?? ""}
               onChangeText={(text) => handleChange("visitingCity", text)}
               placeholder="Voer plaats in"
@@ -449,10 +540,15 @@ export default function ContactEdit() {
           </View>
 
           <View style={styles.field}>
-            <Text style={[styles.label, { color: colors.textSecondary }]}>Land</Text>
+            <Text style={[styles.label, { color: colors.textSecondary }]}>
+              Land
+            </Text>
             <TextInput
               testID="contact-visitingCountry-input"
-              style={[styles.input, { color: colors.text, borderColor: colors.textSecondary }]}
+              style={[
+                styles.input,
+                { color: colors.text, borderColor: colors.textSecondary },
+              ]}
               value={formData.visitingCountry ?? ""}
               onChangeText={(text) => handleChange("visitingCountry", text)}
               placeholder="Voer land in"
@@ -464,13 +560,20 @@ export default function ContactEdit() {
 
       {/* Bankgegevens */}
       <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>Bankgegevens</Text>
+        <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>
+          Bankgegevens
+        </Text>
 
         <View style={styles.field}>
-          <Text style={[styles.label, { color: colors.textSecondary }]}>IBAN</Text>
+          <Text style={[styles.label, { color: colors.textSecondary }]}>
+            IBAN
+          </Text>
           <TextInput
             testID="contact-bankIBAN-input"
-            style={[styles.input, { color: colors.text, borderColor: colors.textSecondary }]}
+            style={[
+              styles.input,
+              { color: colors.text, borderColor: colors.textSecondary },
+            ]}
             value={formData.bankIBAN ?? ""}
             onChangeText={(text) => handleChange("bankIBAN", text)}
             placeholder="Voer IBAN in"
@@ -479,10 +582,15 @@ export default function ContactEdit() {
         </View>
 
         <View style={styles.field}>
-          <Text style={[styles.label, { color: colors.textSecondary }]}>Ten name van</Text>
+          <Text style={[styles.label, { color: colors.textSecondary }]}>
+            Ten name van
+          </Text>
           <TextInput
             testID="contact-bankPersonName-input"
-            style={[styles.input, { color: colors.text, borderColor: colors.textSecondary }]}
+            style={[
+              styles.input,
+              { color: colors.text, borderColor: colors.textSecondary },
+            ]}
             value={formData.bankPersonName ?? ""}
             onChangeText={(text) => handleChange("bankPersonName", text)}
             placeholder="Voer naam rekeninghouder in"
@@ -492,11 +600,15 @@ export default function ContactEdit() {
       </View>
 
       {validationError ? (
-        <Text style={[styles.error, { color: colors.danger }]}>{validationError}</Text>
+        <Text style={[styles.error, { color: colors.danger }]}>
+          {validationError}
+        </Text>
       ) : null}
 
       {saveError ? (
-        <Text style={[styles.error, { color: colors.danger }]}>{saveError}</Text>
+        <Text style={[styles.error, { color: colors.danger }]}>
+          {saveError}
+        </Text>
       ) : null}
 
       <Pressable
@@ -509,7 +621,7 @@ export default function ContactEdit() {
           {id !== "create" ? "Opslaan" : "Toevoegen"}
         </Text>
       </Pressable>
-    </ScrollView>
+    </KeyboardAwareScrollView>
   );
 }
 

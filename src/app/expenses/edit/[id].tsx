@@ -1,22 +1,22 @@
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { useEffect, useLayoutEffect, useState } from "react";
 import {
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   useColorScheme,
   View,
 } from "react-native";
-import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 
-import { useExpenseById, useCreateOrUpdateExpense } from "@/hooks/useExpenses";
-import { useContactsList } from "@/hooks/useContacts";
-import { useScan } from "@/hooks/scan/useScan";
 import documentsService from "@/api/services/documentsService";
-import { Dropdown } from "@/components/Dropdown";
 import { ExpenseCreateUpdateRequest } from "@/api/types/expenses";
+import { Dropdown } from "@/components/Dropdown";
+import { KeyboardAwareScrollView } from "@/components/KeyboardAwareScrollView";
 import { Colors, Spacing } from "@/constants/theme";
+import { useScan } from "@/hooks/scan/useScan";
+import { useContactsList } from "@/hooks/useContacts";
+import { useCreateOrUpdateExpense, useExpenseById } from "@/hooks/useExpenses";
 
 interface ScannedImage {
   uri: string;
@@ -48,7 +48,8 @@ export default function ExpenseEdit() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
 
-  const [formData, setFormData] = useState<ExpenseCreateUpdateRequest>(defaultExpense);
+  const [formData, setFormData] =
+    useState<ExpenseCreateUpdateRequest>(defaultExpense);
   const [scannedImage, setScannedImage] = useState<ScannedImage | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -101,7 +102,11 @@ export default function ExpenseEdit() {
 
   const handleSelectContact = (contactId: string) => {
     const contact = contactsData?.data.docs.find((c) => c._id === contactId);
-    setFormData((prev) => ({ ...prev, contactId, contactName: contact?.companyName ?? "" }));
+    setFormData((prev) => ({
+      ...prev,
+      contactId,
+      contactName: contact?.companyName ?? "",
+    }));
   };
 
   const handleScan = async () => {
@@ -135,7 +140,8 @@ export default function ExpenseEdit() {
     try {
       let expenseFile = formData.expenseFile;
       if (scannedImage) {
-        expenseFile = await documentsService.uploadReceiptDocument(scannedImage);
+        expenseFile =
+          await documentsService.uploadReceiptDocument(scannedImage);
       }
 
       createOrUpdateExpense.mutate(
@@ -153,19 +159,23 @@ export default function ExpenseEdit() {
         },
       );
     } catch (error) {
-      setSaveError(error instanceof Error ? error.message : "Fout bij opslaan van kosten");
+      setSaveError(
+        error instanceof Error ? error.message : "Fout bij opslaan van kosten",
+      );
       setIsSaving(false);
     }
   };
 
   return (
-    <ScrollView
+    <KeyboardAwareScrollView
       testID="expense-edit-screen"
       style={{ backgroundColor: colors.background }}
       contentContainerStyle={styles.container}
     >
       <View style={styles.field}>
-        <Text style={[styles.label, { color: colors.textSecondary }]}>Contact</Text>
+        <Text style={[styles.label, { color: colors.textSecondary }]}>
+          Contact
+        </Text>
         <Dropdown
           testID="contact-dropdown"
           label="Contact"
@@ -181,34 +191,53 @@ export default function ExpenseEdit() {
       </View>
 
       <View style={styles.field}>
-        <Text style={[styles.label, { color: colors.textSecondary }]}>Omschrijving</Text>
+        <Text style={[styles.label, { color: colors.textSecondary }]}>
+          Omschrijving
+        </Text>
         <TextInput
           testID="expense-info-input"
-          style={[styles.input, { color: colors.text, borderColor: colors.textSecondary }]}
+          style={[
+            styles.input,
+            { color: colors.text, borderColor: colors.textSecondary },
+          ]}
           value={formData.info}
-          onChangeText={(text) => setFormData((prev) => ({ ...prev, info: text }))}
+          onChangeText={(text) =>
+            setFormData((prev) => ({ ...prev, info: text }))
+          }
           placeholder="Voer omschrijving in"
           placeholderTextColor={colors.textSecondary}
         />
       </View>
 
       <View style={styles.field}>
-        <Text style={[styles.label, { color: colors.textSecondary }]}>Datum</Text>
+        <Text style={[styles.label, { color: colors.textSecondary }]}>
+          Datum
+        </Text>
         <TextInput
           testID="expense-date-input"
-          style={[styles.input, { color: colors.text, borderColor: colors.textSecondary }]}
+          style={[
+            styles.input,
+            { color: colors.text, borderColor: colors.textSecondary },
+          ]}
           value={formData.expenseDate}
-          onChangeText={(text) => setFormData((prev) => ({ ...prev, expenseDate: text }))}
+          onChangeText={(text) =>
+            setFormData((prev) => ({ ...prev, expenseDate: text }))
+          }
           placeholder="JJJJ-MM-DD"
           placeholderTextColor={colors.textSecondary}
         />
       </View>
 
       <View style={styles.field}>
-        <Text style={[styles.label, { color: colors.textSecondary }]}>BTW 21%</Text>
+        <Text style={[styles.label, { color: colors.textSecondary }]}>
+          BTW 21%
+        </Text>
         <TextInput
           testID="expense-tax-input"
-          style={[styles.input, { color: colors.text, borderColor: colors.textSecondary }]}
+          style={[
+            styles.input,
+            { color: colors.text, borderColor: colors.textSecondary },
+          ]}
           value={String(formData.tax)}
           onChangeText={(text) =>
             setFormData((prev) => ({ ...prev, tax: parseFloat(text) || 0 }))
@@ -218,10 +247,15 @@ export default function ExpenseEdit() {
       </View>
 
       <View style={styles.field}>
-        <Text style={[styles.label, { color: colors.textSecondary }]}>BTW 9%</Text>
+        <Text style={[styles.label, { color: colors.textSecondary }]}>
+          BTW 9%
+        </Text>
         <TextInput
           testID="expense-taxlow-input"
-          style={[styles.input, { color: colors.text, borderColor: colors.textSecondary }]}
+          style={[
+            styles.input,
+            { color: colors.text, borderColor: colors.textSecondary },
+          ]}
           value={String(formData.taxLow)}
           onChangeText={(text) =>
             setFormData((prev) => ({ ...prev, taxLow: parseFloat(text) || 0 }))
@@ -231,10 +265,15 @@ export default function ExpenseEdit() {
       </View>
 
       <View style={styles.field}>
-        <Text style={[styles.label, { color: colors.textSecondary }]}>Bedrag (incl. BTW)</Text>
+        <Text style={[styles.label, { color: colors.textSecondary }]}>
+          Bedrag (incl. BTW)
+        </Text>
         <TextInput
           testID="expense-price-input"
-          style={[styles.input, { color: colors.text, borderColor: colors.textSecondary }]}
+          style={[
+            styles.input,
+            { color: colors.text, borderColor: colors.textSecondary },
+          ]}
           value={String(formData.price)}
           onChangeText={(text) =>
             setFormData((prev) => ({ ...prev, price: parseFloat(text) || 0 }))
@@ -249,12 +288,22 @@ export default function ExpenseEdit() {
         onPress={handleScan}
         disabled={isScanning}
       >
-        <Text style={styles.buttonText}>{isScanning ? "Bon scannen..." : "Bon scannen"}</Text>
+        <Text style={styles.buttonText}>
+          {isScanning ? "Bon scannen..." : "Bon scannen"}
+        </Text>
       </Pressable>
 
-      {scanError ? <Text style={[styles.error, { color: colors.danger }]}>{scanError}</Text> : null}
+      {scanError ? (
+        <Text style={[styles.error, { color: colors.danger }]}>
+          {scanError}
+        </Text>
+      ) : null}
 
-      {saveError ? <Text style={[styles.error, { color: colors.danger }]}>{saveError}</Text> : null}
+      {saveError ? (
+        <Text style={[styles.error, { color: colors.danger }]}>
+          {saveError}
+        </Text>
+      ) : null}
 
       <Pressable
         testID="expense-save-button"
@@ -262,9 +311,11 @@ export default function ExpenseEdit() {
         onPress={handleSave}
         disabled={isSaving}
       >
-        <Text style={styles.buttonText}>{id !== "create" ? "Opslaan" : "Toevoegen"}</Text>
+        <Text style={styles.buttonText}>
+          {id !== "create" ? "Opslaan" : "Toevoegen"}
+        </Text>
       </Pressable>
-    </ScrollView>
+    </KeyboardAwareScrollView>
   );
 }
 
