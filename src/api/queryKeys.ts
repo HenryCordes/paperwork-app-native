@@ -31,6 +31,11 @@ const QueryKeys = {
     list: (params: InvoicesQueryParams) => [...QueryKeys.invoices.base, "list", params] as const,
     detail: (id: string) => [...QueryKeys.invoices.base, "detail", id] as const,
   },
+  emails: {
+    base: ["emails"] as const,
+    list: (offset?: number) => [...QueryKeys.emails.base, "list", offset] as const,
+    detail: (id?: string) => [...QueryKeys.emails.base, "detail", id] as const,
+  },
   settings: {
     base: ["settings"] as const,
     detail: () => [...QueryKeys.settings.base, "detail"] as const,
